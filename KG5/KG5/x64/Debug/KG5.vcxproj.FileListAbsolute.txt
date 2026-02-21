@@ -1,4 +1,0 @@
-C:\Users\HYPERPC\source\repos\KG5\x64\Debug\D3D12\D3D12Core.dll
-C:\Users\HYPERPC\source\repos\KG5\x64\Debug\D3D12\D3D12Core.pdb
-C:\Users\HYPERPC\source\repos\KG5\x64\Debug\D3D12\D3D12SDKLayers.dll
-C:\Users\HYPERPC\source\repos\KG5\x64\Debug\D3D12\D3D12SDKLayers.pdb
