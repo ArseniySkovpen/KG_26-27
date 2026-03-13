@@ -471,9 +471,9 @@ void Renderer::DrawScene(float totalTime, float /*dt*/)
 		cb.TexTilingY = m_texTiling.y;
 		cb.TexScrollX = m_texScroll.x;
 		cb.TexScrollY = m_texScroll.y;
+		//задаются конст
 		memcpy(slotPtr, &cb, sizeof(cb));
 		m_cmdList->SetGraphicsRootConstantBufferView(0, cbAddr);
-		// Bind SRV
 		int srvIdx = (mat.hasTexture && mat.srvHeapIndex >= 0) ? mat.srvHeapIndex : 0;
 		CD3DX12_GPU_DESCRIPTOR_HANDLE srvH(
 			m_cbvSrvHeap->GetGPUDescriptorHandleForHeapStart(),

@@ -16,10 +16,9 @@ public:
 			m_window.GetWidth(),
 			m_window.GetHeight()))
 			return false;
-		// Texture tiling 2x2, slow horizontal UV scroll
-		m_renderer.SetTexTiling(2.0f, 2.0f);
-		m_renderer.SetTexScroll(0.05f, 0.0f);
-		// Uncomment to load an OBJ model (must have .mtl + textures next to .exe)
+		// скрол текстур
+		m_renderer.SetTexTiling(1.0f, 0.5f);
+		m_renderer.SetTexScroll(0.5f, 0.3f);
 		 m_renderer.LoadObj("sponza.obj");
 		m_timer.Reset();
 		return true;
