@@ -6,3 +6,7 @@ C:\Users\skovp\Desktop\KG_26-27\KG5\x64\Debug\D3D12\D3D12Core.dll
 C:\Users\skovp\Desktop\KG_26-27\KG5\x64\Debug\D3D12\D3D12Core.pdb
 C:\Users\skovp\Desktop\KG_26-27\KG5\x64\Debug\D3D12\D3D12SDKLayers.dll
 C:\Users\skovp\Desktop\KG_26-27\KG5\x64\Debug\D3D12\D3D12SDKLayers.pdb
+C:\Users\HYPERPC\Desktop\KG_26-27\KG5\x64\Debug\D3D12\D3D12Core.dll
+C:\Users\HYPERPC\Desktop\KG_26-27\KG5\x64\Debug\D3D12\D3D12Core.pdb
+C:\Users\HYPERPC\Desktop\KG_26-27\KG5\x64\Debug\D3D12\D3D12SDKLayers.dll
+C:\Users\HYPERPC\Desktop\KG_26-27\KG5\x64\Debug\D3D12\D3D12SDKLayers.pdb

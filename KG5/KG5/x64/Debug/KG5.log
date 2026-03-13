@@ -1,5 +1,1 @@
-﻿  main.cpp
-C:\Users\skovp\Desktop\KG_26-27\KG5\Timer.h(10,35): warning C4244: return: преобразование "const double" в "float", возможна потеря данных
-  (компиляция исходного файла "main.cpp")
-  
-  KG5.vcxproj -> C:\Users\skovp\Desktop\KG_26-27\KG5\x64\Debug\KG5.exe
+﻿  KG5.vcxproj -> C:\Users\HYPERPC\Desktop\KG_26-27\KG5\x64\Debug\KG5.exe
