@@ -21,8 +21,14 @@
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
 
+// ============================================================================
+// Вершина
+// ============================================================================
 struct Vertex { XMFLOAT3 Position; XMFLOAT3 Normal; XMFLOAT2 TexCoord; };
 
+// ============================================================================
+// CB для geometry pass (один слот = один сабсет одного кадра)
+// ============================================================================
 struct GBufferCBData
 {
     XMFLOAT4X4 World;
@@ -30,50 +36,57 @@ struct GBufferCBData
     XMFLOAT4X4 Proj;
     XMFLOAT4X4 WorldInvTranspose;
     XMFLOAT4   MaterialDiffuse;
-    XMFLOAT4   MaterialSpecular; 
+    XMFLOAT4   MaterialSpecular; // w = specular power
     int        HasTexture;
-    float      TexTilingX;
-    float      TexTilingY;
-    float      TotalTime;
-    float      TexScrollX;
-    float      TexScrollY;
-    float      Pad[2];           
+    float      TexTilingX, TexTilingY, TotalTime;
+    float      TexScrollX, TexScrollY;
+    float      Pad[2];
 };
 
+// ============================================================================
+// Источники света
+// ============================================================================
 static constexpr int MAX_POINT_LIGHTS = 16;
 static constexpr int MAX_SPOT_LIGHTS = 4;
 
-struct PointLightData { XMFLOAT4 Position; XMFLOAT4 Color; }; 
-struct SpotLightData { XMFLOAT4 Position; XMFLOAT4 Direction; XMFLOAT4 Color; }; 
+struct PointLightData { XMFLOAT4 Position; XMFLOAT4 Color; }; // Position.w=radius, Color.w=intensity
+struct SpotLightData { XMFLOAT4 Position; XMFLOAT4 Direction; XMFLOAT4 Color; }; // Pos.w=innerCos, Dir.w=outerCos, Color.w=intensity
 
-
+// ============================================================================
+// CB для lighting pass (один слот на кадр)
+// ============================================================================
 struct LightingCBData
 {
     XMFLOAT4 EyePos;
     XMFLOAT4 AmbientColor;
-    XMFLOAT4 DirLightDir;   
-    XMFLOAT4 DirLightColor; 
+    XMFLOAT4 DirLightDir;
+    XMFLOAT4 DirLightColor;
     PointLightData PointLights[MAX_POINT_LIGHTS];
     SpotLightData  SpotLights[MAX_SPOT_LIGHTS];
     int NumPointLights, NumSpotLights, Pad0, Pad1;
 };
 
+// ============================================================================
+// Материал
+// ============================================================================
 struct GpuMaterial
 {
     ComPtr<ID3D12Resource> texture, textureUpload;
     int      srvHeapIndex = -1;
     XMFLOAT4 diffuse = { 0.8f,0.8f,0.8f,1.f };
-    XMFLOAT4 specular = { 0.5f,0.5f,0.5f,32.f }; 
+    XMFLOAT4 specular = { 0.5f,0.5f,0.5f,32.f }; // w = specular power
     bool     hasTexture = false;
 };
 
+// ============================================================================
+// RenderingSystem
+// ============================================================================
 class RenderingSystem
 {
 public:
     static constexpr UINT FRAME_COUNT = 2;
     static constexpr UINT MAX_TEXTURES = 512;
     static constexpr UINT MAX_SUBSETS = 512;
-
     RenderingSystem() = default;
     ~RenderingSystem();
 
@@ -122,7 +135,6 @@ private:
     void FlushCommandQueue();
     void DoGeometryPass(float totalTime);
     void DoLightingPass();
-
     ComPtr<IDXGIFactory6>             m_factory;
     ComPtr<ID3D12Device>              m_device;
     ComPtr<ID3D12CommandQueue>        m_cmdQueue;
@@ -132,7 +144,10 @@ private:
     ComPtr<ID3D12Resource>            m_renderTargets[FRAME_COUNT];
     UINT                              m_frameIndex = 0;
 
-    
+    // Heap layout:
+    //   RTV: [0..1]=swapchain, [2..4]=GBuffer RTVs
+    //   DSV: [0]=GBuffer depth
+    //   SRV: [0]=null, [1..512]=object textures, [513..515]=GBuffer SRVs
     ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
     ComPtr<ID3D12DescriptorHeap> m_dsvHeap;
     ComPtr<ID3D12DescriptorHeap> m_srvHeap;
@@ -173,4 +188,5 @@ private:
 
     int  m_width = 0, m_height = 0;
     bool m_initialized = false;
+
 };

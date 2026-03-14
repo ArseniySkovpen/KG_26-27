@@ -1,78 +1,78 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\",
+  "WorkspaceRootPath": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Renderingsystem.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:Renderingsystem.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Renderingsystem.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:Renderingsystem.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Lightingshader.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:Lightingshader.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\GBufferShader.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:GBufferShader.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\InputDevice.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:InputDevice.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Renderingsystem.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:Renderingsystem.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Gbuffer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:Gbuffer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Renderingsystem.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:Renderingsystem.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Gbuffer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Lightingshader.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:Lightingshader.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\GBufferShader.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:GBufferShader.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Gbuffer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:Gbuffer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\PhongShader.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\PhongShader.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:PhongShader.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Window.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:Window.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\ObjLoader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:ObjLoader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Timer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:Timer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\TextureLoader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:TextureLoader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Window.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Window.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:Window.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Timer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\InputDevice.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:InputDevice.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Gbuffer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:Gbuffer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Window.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:Window.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\ObjLoader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:ObjLoader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Timer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:Timer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\TextureLoader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:TextureLoader.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Timer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:Timer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\TextureLoader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\TextureLoader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:TextureLoader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Renderer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:Renderer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\ObjLoader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:ObjLoader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\ObjLoader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:ObjLoader.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Renderer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Renderer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -82,130 +82,131 @@
       "DocumentGroups": [
         {
           "DockedWidth": 302,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Renderingsystem.cpp",
-              "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Renderingsystem.cpp",
-              "RelativeDocumentMoniker": "Renderingsystem.cpp",
-              "ToolTip": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Renderingsystem.cpp",
-              "RelativeToolTip": "Renderingsystem.cpp",
-              "ViewState": "AgIAAE8CAAAAAAAAAAAgwO8CAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2026-03-13T15:41:40.97Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "InputDevice.h",
-              "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\InputDevice.h",
-              "RelativeDocumentMoniker": "InputDevice.h",
-              "ToolTip": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\InputDevice.h",
-              "RelativeToolTip": "InputDevice.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAUwDgAAAACAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-02-21T13:59:05.291Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "Renderingsystem.h",
-              "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Renderingsystem.h",
+              "DocumentMoniker": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Renderingsystem.h",
               "RelativeDocumentMoniker": "Renderingsystem.h",
-              "ToolTip": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Renderingsystem.h",
+              "ToolTip": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Renderingsystem.h",
               "RelativeToolTip": "Renderingsystem.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAE4AAAAAAAAAAAAAAHsAAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2026-03-13T15:41:59.496Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 5,
               "Title": "Gbuffer.h",
-              "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Gbuffer.h",
+              "DocumentMoniker": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Gbuffer.h",
               "RelativeDocumentMoniker": "Gbuffer.h",
-              "ToolTip": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Gbuffer.h",
+              "ToolTip": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Gbuffer.h",
               "RelativeToolTip": "Gbuffer.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACwAAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2026-03-13T15:42:17.332Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "Window.h",
-              "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Window.h",
-              "RelativeDocumentMoniker": "Window.h",
-              "ToolTip": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Window.h",
-              "RelativeToolTip": "Window.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 8,
+              "Title": "InputDevice.h",
+              "DocumentMoniker": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\InputDevice.h",
+              "RelativeDocumentMoniker": "InputDevice.h",
+              "ToolTip": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\InputDevice.h",
+              "RelativeToolTip": "InputDevice.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAUwDgAAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-02-21T13:59:11.645Z"
+              "WhenOpened": "2026-02-21T13:59:05.291Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 7,
+              "Title": "Window.h",
+              "DocumentMoniker": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Window.h",
+              "RelativeDocumentMoniker": "Window.h",
+              "ToolTip": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Window.h",
+              "RelativeToolTip": "Window.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2026-02-21T13:59:11.645Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
               "Title": "main.cpp",
-              "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\main.cpp",
+              "DocumentMoniker": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\main.cpp",
               "RelativeDocumentMoniker": "main.cpp",
-              "ToolTip": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\main.cpp",
+              "ToolTip": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\main.cpp",
               "RelativeToolTip": "main.cpp",
-              "ViewState": "AgIAAL0AAAAAAAAAAAAgwNIAAAAdAAAAAAAAAA==",
+              "ViewState": "AgIAAEAAAAAAAAAAAAAlwFMAAAAvAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2026-02-21T13:58:51.731Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
+              "Title": "Renderingsystem.cpp",
+              "DocumentMoniker": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Renderingsystem.cpp",
+              "RelativeDocumentMoniker": "Renderingsystem.cpp",
+              "ToolTip": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Renderingsystem.cpp",
+              "RelativeToolTip": "Renderingsystem.cpp",
+              "ViewState": "AgIAAOsBAAAAAAAAAAASwAkCAAA7AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2026-03-13T15:41:40.97Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "Lightingshader.hlsl",
-              "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Lightingshader.hlsl",
+              "DocumentMoniker": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Lightingshader.hlsl",
               "RelativeDocumentMoniker": "Lightingshader.hlsl",
-              "ToolTip": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Lightingshader.hlsl",
+              "ToolTip": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Lightingshader.hlsl",
               "RelativeToolTip": "Lightingshader.hlsl",
-              "ViewState": "AgIAAEkAAAAAAAAAAAAIwLAAAAAiAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2026-03-13T16:01:56.584Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "GBufferShader.hlsl",
-              "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\GBufferShader.hlsl",
+              "DocumentMoniker": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\GBufferShader.hlsl",
               "RelativeDocumentMoniker": "GBufferShader.hlsl",
-              "ToolTip": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\GBufferShader.hlsl",
+              "ToolTip": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\GBufferShader.hlsl",
               "RelativeToolTip": "GBufferShader.hlsl",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACkAAAA1AAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
               "WhenOpened": "2026-03-13T16:00:50.311Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 6,
               "Title": "PhongShader.hlsl",
-              "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\PhongShader.hlsl",
+              "DocumentMoniker": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\PhongShader.hlsl",
               "RelativeDocumentMoniker": "PhongShader.hlsl",
-              "ToolTip": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\PhongShader.hlsl",
+              "ToolTip": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\PhongShader.hlsl",
               "RelativeToolTip": "PhongShader.hlsl",
-              "ViewState": "AgIAAD8AAAAAAAAAAAAAAEUAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEUAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-02-21T14:19:41.521Z"
+              "WhenOpened": "2026-02-21T14:19:41.521Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 15,
               "Title": "TextureLoader.h",
-              "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\TextureLoader.h",
+              "DocumentMoniker": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\TextureLoader.h",
               "RelativeDocumentMoniker": "TextureLoader.h",
-              "ToolTip": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\TextureLoader.h",
+              "ToolTip": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\TextureLoader.h",
               "RelativeToolTip": "TextureLoader.h",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
@@ -213,24 +214,23 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 9,
               "Title": "Gbuffer.cpp",
-              "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Gbuffer.cpp",
+              "DocumentMoniker": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Gbuffer.cpp",
               "RelativeDocumentMoniker": "Gbuffer.cpp",
-              "ToolTip": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Gbuffer.cpp",
+              "ToolTip": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Gbuffer.cpp",
               "RelativeToolTip": "Gbuffer.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2026-03-13T15:42:30.382Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-13T15:42:30.382Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 17,
               "Title": "Renderer.h",
-              "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Renderer.h",
+              "DocumentMoniker": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Renderer.h",
               "RelativeDocumentMoniker": "Renderer.h",
-              "ToolTip": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Renderer.h",
+              "ToolTip": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Renderer.h",
               "RelativeToolTip": "Renderer.h",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
@@ -238,11 +238,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 16,
               "Title": "ObjLoader.h",
-              "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\ObjLoader.h",
+              "DocumentMoniker": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\ObjLoader.h",
               "RelativeDocumentMoniker": "ObjLoader.h",
-              "ToolTip": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\ObjLoader.h",
+              "ToolTip": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\ObjLoader.h",
               "RelativeToolTip": "ObjLoader.h",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
@@ -250,11 +250,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "Window.cpp",
-              "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Window.cpp",
+              "DocumentMoniker": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Window.cpp",
               "RelativeDocumentMoniker": "Window.cpp",
-              "ToolTip": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Window.cpp",
+              "ToolTip": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Window.cpp",
               "RelativeToolTip": "Window.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAEYAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
@@ -262,11 +262,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 12,
               "Title": "Timer.cpp",
-              "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Timer.cpp",
+              "DocumentMoniker": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Timer.cpp",
               "RelativeDocumentMoniker": "Timer.cpp",
-              "ToolTip": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Timer.cpp",
+              "ToolTip": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Timer.cpp",
               "RelativeToolTip": "Timer.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
@@ -274,11 +274,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 13,
               "Title": "TextureLoader.cpp",
-              "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\TextureLoader.cpp",
+              "DocumentMoniker": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\TextureLoader.cpp",
               "RelativeDocumentMoniker": "TextureLoader.cpp",
-              "ToolTip": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\TextureLoader.cpp",
+              "ToolTip": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\TextureLoader.cpp",
               "RelativeToolTip": "TextureLoader.cpp",
               "ViewState": "AgIAAEgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
@@ -286,11 +286,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 11,
               "Title": "ObjLoader.cpp",
-              "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\ObjLoader.cpp",
+              "DocumentMoniker": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\ObjLoader.cpp",
               "RelativeDocumentMoniker": "ObjLoader.cpp",
-              "ToolTip": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\ObjLoader.cpp",
+              "ToolTip": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\ObjLoader.cpp",
               "RelativeToolTip": "ObjLoader.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
@@ -300,23 +300,13 @@
               "$type": "Document",
               "DocumentIndex": 14,
               "Title": "Timer.h",
-              "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Timer.h",
+              "DocumentMoniker": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Timer.h",
               "RelativeDocumentMoniker": "Timer.h",
-              "ToolTip": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Timer.h",
+              "ToolTip": "C:\\Users\\skovp\\Desktop\\KG_26-27\\KG5\\Timer.h",
               "RelativeToolTip": "Timer.h",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2026-02-21T13:59:10.46Z"
-            }
-          ]
-        },
-        {
-          "DockedWidth": 124,
-          "SelectedChildIndex": -1,
-          "Children": [
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
             }
           ]
         }
