@@ -78,6 +78,20 @@ struct GpuMaterial
     bool     hasTexture = false;
 };
 
+struct TessCBData
+{
+    XMFLOAT4X4 World;
+    XMFLOAT4X4 View;
+    XMFLOAT4X4 Proj;
+    XMFLOAT4X4 WorldInvTranspose;
+    XMFLOAT3   EyePos;
+    float      DisplacementScale;
+    float      MinDist;
+    float      MaxDist;
+    float      MinTessFactor;
+    float      MaxTessFactor;
+};
+
 // ============================================================================
 // RenderingSystem
 // ============================================================================
@@ -87,6 +101,7 @@ public:
     static constexpr UINT FRAME_COUNT = 2;
     static constexpr UINT MAX_TEXTURES = 512;
     static constexpr UINT MAX_SUBSETS = 512;
+
     RenderingSystem() = default;
     ~RenderingSystem();
 
@@ -113,6 +128,12 @@ public:
         m_eye = eye; m_target = target; m_up = up;
     }
 
+    bool LoadTessPlane(const std::wstring& dispPath, const std::wstring& normalPath,
+        XMFLOAT3 center, float size, float displacementScale = 50.f);
+    void SetTessWireframe(bool enabled) { m_tessWireframe = enabled; }
+
+    void SetWireframe(bool enabled) { m_tessWireframe = enabled; }
+
 private:
     void CreateDevice();
     void CreateCommandObjects();
@@ -125,6 +146,10 @@ private:
     void CreateLightingRootSignature();
     void CreateGeometryPSO();
     void CreateLightingPSO();
+    void CreateTessRootSignature();
+    void CreateTessPSO();
+    void CreateTessCB();
+    void DoTessPass(float totalTime);
     void CreateDefaultGeometry();
     void CreateGeometryCB();
     void CreateLightingCB();
@@ -135,6 +160,7 @@ private:
     void FlushCommandQueue();
     void DoGeometryPass(float totalTime);
     void DoLightingPass();
+
     ComPtr<IDXGIFactory6>             m_factory;
     ComPtr<ID3D12Device>              m_device;
     ComPtr<ID3D12CommandQueue>        m_cmdQueue;
@@ -159,10 +185,28 @@ private:
     UINT64              m_fenceValues[FRAME_COUNT]{};
     HANDLE              m_fenceEvent = nullptr;
 
-    ComPtr<ID3D12RootSignature> m_geoRS, m_lightRS;
-    ComPtr<ID3D12PipelineState> m_geoPSO, m_lightPSO;
+    ComPtr<ID3D12RootSignature> m_geoRS, m_lightRS, m_tessRS;
+    ComPtr<ID3D12PipelineState> m_geoPSO, m_lightPSO, m_tessPSO, m_tessWirePSO;
     ComPtr<ID3DBlob>            m_geoVS, m_geoPS;
     ComPtr<ID3DBlob>            m_lightVS, m_lightPS;
+    ComPtr<ID3DBlob>            m_tessVS, m_tessHS, m_tessDS, m_tessPS;
+    bool                        m_tessWireframe = false;
+
+    // Тесселированная плоскость
+    ComPtr<ID3D12Resource>   m_tessVB, m_tessIB;
+    D3D12_VERTEX_BUFFER_VIEW m_tessVBView{};
+    D3D12_INDEX_BUFFER_VIEW  m_tessIBView{};
+    UINT                     m_tessIndexCount = 0;
+    ComPtr<ID3D12Resource>   m_tessDispTex, m_tessDispUpload;
+    ComPtr<ID3D12Resource>   m_tessNormTex, m_tessNormUpload;
+    int                      m_tessDispSRV = -1;
+    int                      m_tessNormSRV = -1;
+    float                    m_tessDispScale = 50.f;
+    bool                     m_tessReady = false;
+
+    ComPtr<ID3D12Resource>   m_tessCB;
+    UINT8* m_tessCBMapped = nullptr;
+    UINT                     m_tessCBSlotSize = 0;
 
     ComPtr<ID3D12Resource>   m_vertexBuffer, m_indexBuffer;
     D3D12_VERTEX_BUFFER_VIEW m_vbView{};
@@ -188,5 +232,4 @@ private:
 
     int  m_width = 0, m_height = 0;
     bool m_initialized = false;
-
 };

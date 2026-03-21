@@ -67,5 +67,6 @@
     <None Include="packages.config" />
     <None Include="Lightingshader.hlsl" />
     <None Include="GBufferShader.hlsl" />
+    <None Include="TessShader.hlsl" />
   </ItemGroup>
 </Project>

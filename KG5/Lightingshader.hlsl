@@ -1,3 +1,7 @@
+// ============================================================================
+// LightingShader.hlsl — Lighting Pass
+// ============================================================================
+
 #define MAX_POINT_LIGHTS 16
 #define MAX_SPOT_LIGHTS   4
 
@@ -98,9 +102,10 @@ float4 PSMain(VSOutput pin) : SV_Target
 {
     float4 albedoData = gAlbedoMap.Sample(gSampler, pin.UV);
     float4 normalData = gNormalMap.Sample(gSampler, pin.UV);
-    float3 pos = gPositionMap.Sample(gSampler, pin.UV).rgb;
+    float4 positionData = gPositionMap.Sample(gSampler, pin.UV);
+    float3 pos = positionData.rgb;
 
-    if (length(pos) < 0.001f)
+    if (dot(positionData, positionData) < 0.000001f)
         return float4(0, 0, 0, 1);
 
     float3 albedo = albedoData.rgb;

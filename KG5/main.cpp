@@ -14,6 +14,7 @@ public:
     float    pitch = -10.f;
     float    moveSpeed = 300.f;
     float    mouseSens = 0.15f;
+
     void Update(const InputDevice& input, float dt)
     {
         if (input.IsMouseDown(1))
@@ -81,9 +82,10 @@ public:
     static constexpr float CEILING_Y = 430.f;
     static constexpr float FLOOR_Y = 5.f;
     static constexpr float GRAVITY = -25.f;
-    static constexpr float SPAWN_INTERVAL = 0.5f;
+    static constexpr float SPAWN_INTERVAL = 0.15f;
     static constexpr int   MAX_LIGHTS = 13;
-    static constexpr float SLOT_Z[2] = { 100.f, -100.f };
+    static constexpr float SLOT_Z[2] = { 50.f, -50.f };
+
     void Update(float dt)
     {
         m_spawnTimer += dt;
@@ -96,10 +98,8 @@ public:
         for (auto& l : m_lights)
         {
             if (l.landed) continue;
-
             l.velY += GRAVITY * dt;
             l.pos.y += l.velY * dt;
-
             if (l.pos.y <= FLOOR_Y)
             {
                 l.pos.y = FLOOR_Y;
@@ -125,19 +125,19 @@ private:
         float jitter = ((float)rand() / RAND_MAX - 0.5f) * 30.f;
         l.pos.z = SLOT_Z[slot] + jitter;
         l.pos.y = CEILING_Y;
-        l.velY = -5.f;
+        l.velY = 0.f;
         l.landed = false;
         float r = 0.8f + (float)rand() / RAND_MAX * 0.2f;
         float g = 0.2f + (float)rand() / RAND_MAX * 0.5f;
         float b = 0.0f + (float)rand() / RAND_MAX * 0.15f;
         l.color = { r, g, b };
-        l.radius = 300.f + (float)rand() / RAND_MAX * 300.f;
+        l.radius = 300.f + (float)rand() / RAND_MAX * 200.f;
         l.intensity = 15.0f;
         m_lights.push_back(l);
     }
+
     std::vector<FallingLight> m_lights;
     float m_spawnTimer = 0.f;
-
 };
 
 class App
@@ -146,7 +146,8 @@ public:
     bool Init(HINSTANCE hInstance)
     {
         srand(12345);
-        if (!m_window.Init(hInstance, 1280, 720, L"DX12 Deferred - Falling Lights"))
+
+        if (!m_window.Init(hInstance, 1280, 720, L"DX12 Deferred - Bedroom"))
             return false;
 
         m_window.SetResizeCallback([this](int w, int h) {
@@ -159,11 +160,22 @@ public:
             return false;
 
         if (!m_renderer.LoadObj("sponza.obj"))
-            MessageBoxA(nullptr, "Не удалось загрузить sponza.obj",
-                "Ошибка", MB_OK | MB_ICONWARNING);
+            MessageBoxA(nullptr, "Ne udalos zagruzit sponza.obj",
+                "Oshibka", MB_OK | MB_ICONWARNING);
 
+        // Без анимации UV — фотограмметрия не терпит деформации текстур
         m_renderer.SetTexTiling(1.0f, 1.0f);
         m_renderer.SetTexScroll(1.0f, 0.3f);
+
+        // Тесселированная плоскость (пол)
+        // Положи displacement.png и normal.png рядом с .exe
+        m_renderer.LoadTessPlane(
+            L"textures/disp.png",
+            L"textures/norm.png",
+            { 0.f, 5.f, 0.f },
+            1200.f,
+            60.f);
+
         m_timer.Reset();
         return true;
     }
@@ -196,6 +208,11 @@ public:
             float dt = m_timer.DeltaTime();
 
             if (m_input.IsKeyDown(VK_ESCAPE)) PostQuitMessage(0);
+
+            // F — переключить wireframe тесселяции
+            if (m_input.IsKeyDown('F') && !m_fWasDown)
+                m_renderer.SetWireframe(!m_wireframe), m_wireframe = !m_wireframe;
+            m_fWasDown = m_input.IsKeyDown('F');
 
             m_camera.Update(m_input, dt);
             m_fallingLights.Update(dt);
@@ -231,6 +248,8 @@ private:
     InputDevice     m_input;
     FPSCamera       m_camera;
     FallingStar     m_fallingLights;
+    bool            m_wireframe = false;
+    bool            m_fWasDown = false;
 };
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
