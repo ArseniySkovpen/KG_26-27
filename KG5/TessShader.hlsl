@@ -11,6 +11,8 @@ cbuffer TessCB : register(b0)
     float gMaxDist;
     float gMinTessFactor;
     float gMaxTessFactor;
+    float gTotalTime;
+    float3 gPad;
 };
 
 Texture2D gDisplacementMap : register(t0);
@@ -46,7 +48,7 @@ struct DSOutput
     float2 TexCoord : TEXCOORD;
 };
 
-VSOutput VSMain(VSInput vin) //подготовка данных
+VSOutput VSMain(VSInput vin)
 {
     VSOutput vout;
     vout.PosW = mul(float4(vin.Position, 1.0f), gWorld).xyz;
@@ -55,7 +57,7 @@ VSOutput VSMain(VSInput vin) //подготовка данных
     return vout;
 }
 
-// вызывается на каждый треугольник  вычисляет насколько сильно разбивать
+// вызывается на каждый треугольник — вычисляет насколько сильно разбивать
 PatchTess PatchHS(InputPatch<VSOutput, 3> patch, uint patchID : SV_PrimitiveID)
 {
     PatchTess pt;
@@ -96,22 +98,26 @@ DSOutput DSMain(PatchTess patchTess,
     DSOutput dout;
 
     float3 posW = bary.x * patch[0].PosW
-                    + bary.y * patch[1].PosW
-                    + bary.z * patch[2].PosW;
+                + bary.y * patch[1].PosW
+                + bary.z * patch[2].PosW;
 
     float3 normalW = bary.x * patch[0].NormalW
-                    + bary.y * patch[1].NormalW
-                    + bary.z * patch[2].NormalW;
+                   + bary.y * patch[1].NormalW
+                   + bary.z * patch[2].NormalW;
 
     float2 uv = bary.x * patch[0].TexCoord
-                    + bary.y * patch[1].TexCoord
-                    + bary.z * patch[2].TexCoord;
+              + bary.y * patch[1].TexCoord
+              + bary.z * patch[2].TexCoord;
 
     normalW = normalize(normalW);
-    
+
     float height = gDisplacementMap.SampleLevel(gSampler, uv, 0).r;
 
-    posW += normalW * (height - 0.5f) * gDisplacementScale;
+    // Синусоидальная волна, бегущая вдоль X с небольшим наклоном по Z
+    float wave = sin(posW.x * 0.006f + posW.z * 0.003f + gTotalTime * 2.0f)
+               * 0.5f + 0.5f; // [0..1]
+
+    posW += normalW * (height * wave - 0.5f) * gDisplacementScale;
 
     dout.PosW = posW;
     dout.NormalW = normalW;
@@ -120,7 +126,8 @@ DSOutput DSMain(PatchTess patchTess,
 
     return dout;
 }
-//Нормал мап и освещение
+
+// Нормал мап и освещение
 float4 PSMain(DSOutput pin) : SV_Target
 {
     float3 baseColor = gColorMap.Sample(gSampler, pin.TexCoord).rgb;

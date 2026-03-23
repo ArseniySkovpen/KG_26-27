@@ -7,9 +7,6 @@ static void ThrowIfFailed(HRESULT hr) {
     if (FAILED(hr)) throw std::runtime_error("DirectX call failed");
 }
 
-// ============================================================================
-// Init
-// ============================================================================
 bool RenderingSystem::Init(HWND hwnd, int width, int height)
 {
     m_width = width; m_height = height;
@@ -22,9 +19,6 @@ bool RenderingSystem::Init(HWND hwnd, int width, int height)
         CreateDescriptorHeaps();
         CreateRenderTargetViews();
 
-        // GBuffer: RTV в слотах FRAME_COUNT..FRAME_COUNT+RT_COUNT-1
-        //          DSV в слоте 0
-        //          SRV в слотах MAX_TEXTURES+1..MAX_TEXTURES+RT_COUNT
         m_gbuffer.Create(
             m_device.Get(), (UINT)width, (UINT)height,
             m_rtvHeap.Get(), FRAME_COUNT, m_rtvDescSize,
@@ -44,7 +38,6 @@ bool RenderingSystem::Init(HWND hwnd, int width, int height)
         CreateLightingCB();
         CreateTessCB();
 
-        // Дефолтное освещение
         m_lightData.AmbientColor = { 0.08f, 0.08f, 0.12f, 1.f };
         SetDirectionalLight({ 0.3f, -1.f, 0.5f }, { 1.f, 0.92f, 0.75f }, 1.f);
 
@@ -62,9 +55,6 @@ bool RenderingSystem::Init(HWND hwnd, int width, int height)
     return true;
 }
 
-// ============================================================================
-// Device
-// ============================================================================
 void RenderingSystem::CreateDevice()
 {
 #ifdef _DEBUG
@@ -116,7 +106,7 @@ void RenderingSystem::CreateSwapChain(HWND hwnd, int w, int h)
 
 void RenderingSystem::CreateDescriptorHeaps()
 {
-    // RTV: FRAME_COUNT (swapchain) + GBuffer::RT_COUNT (MRTs)
+
     {
         D3D12_DESCRIPTOR_HEAP_DESC d{};
         d.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
@@ -124,7 +114,7 @@ void RenderingSystem::CreateDescriptorHeaps()
         ThrowIfFailed(m_device->CreateDescriptorHeap(&d, IID_PPV_ARGS(&m_rtvHeap)));
         m_rtvDescSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
     }
-    // DSV: 1 (GBuffer depth)
+
     {
         D3D12_DESCRIPTOR_HEAP_DESC d{};
         d.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
@@ -132,17 +122,15 @@ void RenderingSystem::CreateDescriptorHeaps()
         ThrowIfFailed(m_device->CreateDescriptorHeap(&d, IID_PPV_ARGS(&m_dsvHeap)));
         m_dsvDescSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
     }
-    // SRV: 1 (null) + MAX_TEXTURES + GBuffer::RT_COUNT
     {
         D3D12_DESCRIPTOR_HEAP_DESC d{};
         d.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-        d.NumDescriptors = 1 + MAX_TEXTURES + GBuffer::RT_COUNT + 3; // +3 для тесселяции
+        d.NumDescriptors = 1 + MAX_TEXTURES + GBuffer::RT_COUNT + 3;
         d.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
         ThrowIfFailed(m_device->CreateDescriptorHeap(&d, IID_PPV_ARGS(&m_srvHeap)));
         m_srvDescSize = m_device->GetDescriptorHandleIncrementSize(
             D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-        // Слот 0 — null SRV (заглушка для untextured материалов)
         D3D12_SHADER_RESOURCE_VIEW_DESC nullDesc{};
         nullDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
         nullDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -172,9 +160,6 @@ void RenderingSystem::CreateFence()
     if (!m_fenceEvent) ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
 }
 
-// ============================================================================
-// Компиляция шейдеров
-// ============================================================================
 void RenderingSystem::CompileShaders()
 {
     UINT flags = 0;
@@ -183,7 +168,6 @@ void RenderingSystem::CompileShaders()
 #endif
     ComPtr<ID3DBlob> errors;
 
-    // --- Geometry pass ---
     HRESULT hr = D3DCompileFromFile(L"GBufferShader.hlsl",
         nullptr, nullptr, "VSMain", "vs_5_0", flags, 0, &m_geoVS, &errors);
     if (FAILED(hr)) { if (errors) OutputDebugStringA((char*)errors->GetBufferPointer()); ThrowIfFailed(hr); }
@@ -192,7 +176,6 @@ void RenderingSystem::CompileShaders()
         nullptr, nullptr, "PSMain", "ps_5_0", flags, 0, &m_geoPS, &errors);
     if (FAILED(hr)) { if (errors) OutputDebugStringA((char*)errors->GetBufferPointer()); ThrowIfFailed(hr); }
 
-    // --- Lighting pass ---
     hr = D3DCompileFromFile(L"LightingShader.hlsl",
         nullptr, nullptr, "VSMain", "vs_5_0", flags, 0, &m_lightVS, &errors);
     if (FAILED(hr)) { if (errors) OutputDebugStringA((char*)errors->GetBufferPointer()); ThrowIfFailed(hr); }
@@ -201,7 +184,6 @@ void RenderingSystem::CompileShaders()
         nullptr, nullptr, "PSMain", "ps_5_0", flags, 0, &m_lightPS, &errors);
     if (FAILED(hr)) { if (errors) OutputDebugStringA((char*)errors->GetBufferPointer()); ThrowIfFailed(hr); }
 
-    // --- Tessellation pass (необязателен — не падаем если файл отсутствует) ---
     ComPtr<ID3DBlob> tessErrors;
     D3DCompileFromFile(L"TessShader.hlsl", nullptr, nullptr, "VSMain", "vs_5_0", flags, 0, &m_tessVS, &tessErrors);
     D3DCompileFromFile(L"TessShader.hlsl", nullptr, nullptr, "HSMain", "hs_5_0", flags, 0, &m_tessHS, &tessErrors);
@@ -210,14 +192,8 @@ void RenderingSystem::CompileShaders()
     if (tessErrors) OutputDebugStringA((char*)tessErrors->GetBufferPointer());
 }
 
-// ============================================================================
-// Root Signatures
-// ============================================================================
 void RenderingSystem::CreateGeometryRootSignature()
 {
-    // param[0] = CBV b0 (per-object: матрицы, материал)
-    // param[1] = SRV table t0 (1 текстура объекта)
-    // static sampler s0: LINEAR WRAP
     CD3DX12_DESCRIPTOR_RANGE srvRange;
     srvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
 
@@ -245,9 +221,6 @@ void RenderingSystem::CreateGeometryRootSignature()
 
 void RenderingSystem::CreateLightingRootSignature()
 {
-    // param[0] = CBV b0 (данные освещения: камера, все источники)
-    // param[1] = SRV table t0-t2 (три GBuffer текстуры)
-    // static sampler s0: POINT CLAMP (GBuffer читаем точно по UV, без интерполяции)
     CD3DX12_DESCRIPTOR_RANGE srvRange;
     srvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, GBuffer::RT_COUNT, 0);
 
@@ -273,9 +246,6 @@ void RenderingSystem::CreateLightingRootSignature()
         IID_PPV_ARGS(&m_lightRS)));
 }
 
-// ============================================================================
-// PSO
-// ============================================================================
 void RenderingSystem::CreateGeometryPSO()
 {
     D3D12_INPUT_ELEMENT_DESC layout[] =
@@ -295,7 +265,6 @@ void RenderingSystem::CreateGeometryPSO()
     pso.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
     pso.SampleMask = UINT_MAX;
     pso.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-    // Выводим в три GBuffer RT одновременно (MRT)
     pso.NumRenderTargets = GBuffer::RT_COUNT;
     for (UINT i = 0; i < GBuffer::RT_COUNT; ++i)
         pso.RTVFormats[i] = GBuffer::FORMATS[i];
@@ -306,7 +275,6 @@ void RenderingSystem::CreateGeometryPSO()
 
 void RenderingSystem::CreateLightingPSO()
 {
-    // Нет vertex input — fullscreen triangle генерируется в VS из SV_VertexID
     D3D12_GRAPHICS_PIPELINE_STATE_DESC pso{};
     pso.InputLayout = { nullptr, 0 };
     pso.pRootSignature = m_lightRS.Get();
@@ -315,7 +283,6 @@ void RenderingSystem::CreateLightingPSO()
     pso.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
     pso.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 
-    // Depth ОТКЛЮЧЁН: lighting pass рисует полноэкранный треугольник поверх swapchain
     D3D12_DEPTH_STENCIL_DESC dsDesc = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
     dsDesc.DepthEnable = FALSE;
     dsDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
@@ -325,14 +292,11 @@ void RenderingSystem::CreateLightingPSO()
     pso.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
     pso.NumRenderTargets = 1;
     pso.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
-    pso.DSVFormat = DXGI_FORMAT_UNKNOWN; // нет depth buffer в lighting pass
+    pso.DSVFormat = DXGI_FORMAT_UNKNOWN;
     pso.SampleDesc = { 1, 0 };
     ThrowIfFailed(m_device->CreateGraphicsPipelineState(&pso, IID_PPV_ARGS(&m_lightPSO)));
 }
 
-// ============================================================================
-// Дефолтный куб (пока не загружен OBJ)
-// ============================================================================
 void RenderingSystem::CreateDefaultGeometry()
 {
     std::array<Vertex, 24> verts = { {
@@ -385,9 +349,6 @@ void RenderingSystem::UploadMeshToGpu(const std::vector<Vertex>& verts,
     m_ibView = { m_indexBuffer->GetGPUVirtualAddress(),  ibSz, DXGI_FORMAT_R32_UINT };
 }
 
-// ============================================================================
-// Константные буферы
-// ============================================================================
 void RenderingSystem::CreateGeometryCB()
 {
     m_geoCBSlotSize = (sizeof(GBufferCBData) + 255) & ~255;
@@ -410,9 +371,6 @@ void RenderingSystem::CreateLightingCB()
     m_lightCB->Map(0, nullptr, reinterpret_cast<void**>(&m_lightCBMapped));
 }
 
-// ============================================================================
-// LoadObj
-// ============================================================================
 bool RenderingSystem::LoadObj(const std::string& path)
 {
     if (m_initialized) FlushCommandQueue();
@@ -454,8 +412,6 @@ void RenderingSystem::LoadMaterials(const ObjMesh& mesh, const std::string& base
         m_gpuMaterials.resize(1);
         return;
     }
-    // reserve ДО цикла — иначе push_back перераспределяет память
-    // и ссылки на элементы становятся невалидными
     m_gpuMaterials.reserve(mesh.materials.size());
     m_gpuMaterials.resize(mesh.materials.size());
     int srvSlot = 0;
@@ -500,9 +456,6 @@ void RenderingSystem::LoadMaterials(const ObjMesh& mesh, const std::string& base
     }
 }
 
-// ============================================================================
-// Управление светом
-// ============================================================================
 void RenderingSystem::SetAmbient(XMFLOAT3 c)
 {
     m_lightData.AmbientColor = { c.x, c.y, c.z, 1.f };
@@ -510,7 +463,6 @@ void RenderingSystem::SetAmbient(XMFLOAT3 c)
 
 void RenderingSystem::SetDirectionalLight(XMFLOAT3 dir, XMFLOAT3 color, float intensity)
 {
-    // Нормализуем направление
     XMVECTOR d = XMVector3Normalize(XMLoadFloat3(&dir));
     XMStoreFloat4(&m_lightData.DirLightDir, XMVectorSetW(d, 0.f));
     m_lightData.DirLightColor = { color.x, color.y, color.z, intensity };
@@ -543,21 +495,15 @@ void RenderingSystem::ClearLights()
 {
     m_lightData.NumPointLights = 0;
     m_lightData.NumSpotLights = 0;
-    m_lightData.DirLightColor.w = 0.f; // выключить directional
+    m_lightData.DirLightColor.w = 0.f; 
 }
 
-// ============================================================================
-// BeginFrame
-// ============================================================================
 void RenderingSystem::BeginFrame(const float /*clearColor*/[4])
 {
     ThrowIfFailed(m_cmdAllocators[m_frameIndex]->Reset());
     ThrowIfFailed(m_cmdList->Reset(m_cmdAllocators[m_frameIndex].Get(), nullptr));
 }
 
-// ============================================================================
-// DrawScene — два прохода
-// ============================================================================
 void RenderingSystem::DrawScene(float totalTime, float /*dt*/)
 {
     if (!m_geoPSO || m_subsets.empty()) return;
@@ -570,12 +516,8 @@ void RenderingSystem::DrawScene(float totalTime, float /*dt*/)
     DoLightingPass();
 }
 
-// ============================================================================
-// GEOMETRY PASS — рисуем геометрию в GBuffer
-// ============================================================================
 void RenderingSystem::DoGeometryPass(float totalTime)
 {
-    // Переводим GBuffer RT'ы в RENDER_TARGET (если они были в SRV)
     m_gbuffer.TransitionToRenderTarget(m_cmdList.Get());
     m_gbuffer.ClearAndSetRenderTargets(m_cmdList.Get(), (UINT)m_width, (UINT)m_height);
 
@@ -602,7 +544,6 @@ void RenderingSystem::DoGeometryPass(float totalTime)
             ? sub.materialIdx : 0;
         const GpuMaterial& mat = m_gpuMaterials.empty() ? GpuMaterial{} : m_gpuMaterials[matIdx];
 
-        // Записываем данные в слот CB этого сабсета
         UINT slotIdx = m_frameIndex * RenderingSystem::MAX_SUBSETS + (subIdx % RenderingSystem::MAX_SUBSETS);
         UINT8* slotPtr = m_geoCBMapped + slotIdx * m_geoCBSlotSize;
         D3D12_GPU_VIRTUAL_ADDRESS cbAddr =
@@ -625,7 +566,6 @@ void RenderingSystem::DoGeometryPass(float totalTime)
 
         m_cmdList->SetGraphicsRootConstantBufferView(0, cbAddr);
 
-        // Текстура объекта (или null-дескриптор в слоте 0 если нет текстуры)
         int srvIdx = (mat.hasTexture && mat.srvHeapIndex >= 0) ? mat.srvHeapIndex : 0;
         CD3DX12_GPU_DESCRIPTOR_HANDLE srvH(
             m_srvHeap->GetGPUDescriptorHandleForHeapStart(), srvIdx, m_srvDescSize);
@@ -635,22 +575,16 @@ void RenderingSystem::DoGeometryPass(float totalTime)
     }
 }
 
-// ============================================================================
-// LIGHTING PASS — полноэкранный треугольник, читаем GBuffer, считаем свет
-// ============================================================================
 void RenderingSystem::DoLightingPass()
 {
-    // GBuffer RT'ы → PIXEL_SHADER_RESOURCE чтобы шейдер мог их читать
     m_gbuffer.TransitionToShaderResource(m_cmdList.Get());
 
-    // Переводим swapchain RT в RENDER_TARGET
     CD3DX12_RESOURCE_BARRIER b = CD3DX12_RESOURCE_BARRIER::Transition(
         m_renderTargets[m_frameIndex].Get(),
         D3D12_RESOURCE_STATE_PRESENT,
         D3D12_RESOURCE_STATE_RENDER_TARGET);
     m_cmdList->ResourceBarrier(1, &b);
 
-    // Выставляем swapchain как output (без depth buffer — он нам не нужен)
     CD3DX12_CPU_DESCRIPTOR_HANDLE rtv(
         m_rtvHeap->GetCPUDescriptorHandleForHeapStart(),
         m_frameIndex, m_rtvDescSize);
@@ -668,7 +602,6 @@ void RenderingSystem::DoLightingPass()
     m_cmdList->SetGraphicsRootSignature(m_lightRS.Get());
     m_cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-    // Обновляем lighting CB для текущего кадра
     m_lightData.EyePos = { m_eye.x, m_eye.y, m_eye.z, 1.f };
     UINT8* lightSlot = m_lightCBMapped + m_frameIndex * m_lightCBSlotSize;
     memcpy(lightSlot, &m_lightData, sizeof(m_lightData));
@@ -677,16 +610,12 @@ void RenderingSystem::DoLightingPass()
 
     m_cmdList->SetGraphicsRootConstantBufferView(0, lightAddr);
 
-    // Биндим GBuffer SRVs (три последовательных слота начиная с MAX_TEXTURES+1)
     m_cmdList->SetGraphicsRootDescriptorTable(1, m_gbuffer.GetSRVTableGPU());
 
-    // Рисуем 3 вершины — fullscreen triangle (нет VB, позиции генерируются в VS)
     m_cmdList->DrawInstanced(3, 1, 0, 0);
 }
 
-// ============================================================================
-// EndFrame
-// ============================================================================
+
 void RenderingSystem::EndFrame()
 {
     CD3DX12_RESOURCE_BARRIER b = CD3DX12_RESOURCE_BARRIER::Transition(
@@ -701,9 +630,7 @@ void RenderingSystem::EndFrame()
     MoveToNextFrame();
 }
 
-// ============================================================================
-// Синхронизация
-// ============================================================================
+
 void RenderingSystem::WaitForGPU()
 {
     const UINT64 val = m_fenceValues[m_frameIndex];
@@ -729,9 +656,7 @@ void RenderingSystem::MoveToNextFrame()
 
 void RenderingSystem::FlushCommandQueue() { WaitForGPU(); }
 
-// ============================================================================
-// OnResize
-// ============================================================================
+
 void RenderingSystem::OnResize(int width, int height)
 {
     if (!m_initialized || (m_width == width && m_height == height)) return;
@@ -751,9 +676,6 @@ void RenderingSystem::OnResize(int width, int height)
         m_srvHeap.Get(), MAX_TEXTURES + 1, m_srvDescSize);
 }
 
-// ============================================================================
-// Destructor
-// ============================================================================
 RenderingSystem::~RenderingSystem()
 {
     if (m_initialized) FlushCommandQueue();
@@ -764,17 +686,12 @@ RenderingSystem::~RenderingSystem()
     CoUninitialize();
 }
 
-// ============================================================================
-// Tessellation Root Signature
-// param[0] = CBV b0 (матрицы, параметры тесселяции)
-// param[1] = SRV table t0..t1 (displacement + normal map)
-// ============================================================================
 void RenderingSystem::CreateTessRootSignature()
 {
     if (!m_tessVS) return;
 
     CD3DX12_DESCRIPTOR_RANGE srvRange;
-    srvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, 0); // disp + normal + color
+    srvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, 0);
 
     CD3DX12_ROOT_PARAMETER params[2];
     params[0].InitAsConstantBufferView(0);
@@ -799,9 +716,7 @@ void RenderingSystem::CreateTessRootSignature()
         IID_PPV_ARGS(&m_tessRS));
 }
 
-// ============================================================================
-// Tessellation PSO
-// ============================================================================
+
 void RenderingSystem::CreateTessPSO()
 {
     if (!m_tessVS || !m_tessHS || !m_tessDS || !m_tessPS || !m_tessRS) return;
@@ -841,9 +756,6 @@ void RenderingSystem::CreateTessPSO()
     if (FAILED(hr)) OutputDebugStringA("TessWirePSO creation failed\n");
 }
 
-// ============================================================================
-// Tessellation CB
-// ============================================================================
 void RenderingSystem::CreateTessCB()
 {
     m_tessCBSlotSize = (sizeof(TessCBData) + 255) & ~255;
@@ -855,10 +767,6 @@ void RenderingSystem::CreateTessCB()
     m_tessCB->Map(0, nullptr, reinterpret_cast<void**>(&m_tessCBMapped));
 }
 
-// ============================================================================
-// LoadTessPlane — создаём плоскость с тесселяцией
-// Плоскость разбита на патчи — каждый патч = 3 вершины (tri patch)
-// ============================================================================
 bool RenderingSystem::LoadTessPlane(const std::wstring& dispPath,
     const std::wstring& normalPath,
     const std::wstring& colorPath,
@@ -870,7 +778,6 @@ bool RenderingSystem::LoadTessPlane(const std::wstring& dispPath,
 
     m_tessDispScale = displacementScale;
 
-    // Генерируем сетку N x N квадратов, каждый квад = 2 патча-треугольника
     const int N = 64;
     float half = size * 0.5f;
     float step = size / N;
@@ -893,7 +800,6 @@ bool RenderingSystem::LoadTessPlane(const std::wstring& dispPath,
             verts.push_back(v);
         }
 
-    // Патчи — треугольники (3 control points)
     for (int row = 0; row < N; ++row)
         for (int col = 0; col < N; ++col)
         {
@@ -906,7 +812,6 @@ bool RenderingSystem::LoadTessPlane(const std::wstring& dispPath,
         }
     m_tessIndexCount = (UINT)indices.size();
 
-    // Загружаем в GPU (upload heap — плоскость статична)
     auto upload = [&](const void* data, UINT sz, ComPtr<ID3D12Resource>& buf) {
         CD3DX12_HEAP_PROPERTIES hp(D3D12_HEAP_TYPE_UPLOAD);
         CD3DX12_RESOURCE_DESC rd = CD3DX12_RESOURCE_DESC::Buffer(sz);
@@ -922,11 +827,9 @@ bool RenderingSystem::LoadTessPlane(const std::wstring& dispPath,
     m_tessVBView = { m_tessVB->GetGPUVirtualAddress(), vbSz, sizeof(Vertex) };
     m_tessIBView = { m_tessIB->GetGPUVirtualAddress(), ibSz, DXGI_FORMAT_R32_UINT };
 
-    // Загружаем текстуры
     ThrowIfFailed(m_cmdAllocators[m_frameIndex]->Reset());
     ThrowIfFailed(m_cmdList->Reset(m_cmdAllocators[m_frameIndex].Get(), nullptr));
 
-    // Displacement map — слот MAX_TEXTURES+RT_COUNT+1
     int dispSlot = MAX_TEXTURES + GBuffer::RT_COUNT + 1;
     int normSlot = dispSlot + 1;
     int colorSlot = dispSlot + 2;
@@ -992,15 +895,11 @@ bool RenderingSystem::LoadTessPlane(const std::wstring& dispPath,
     return m_tessReady;
 }
 
-// ============================================================================
-// DoTessPass — рисуем тесселированную плоскость в GBuffer
-// GBuffer уже выставлен как RT из DoGeometryPass
-// ============================================================================
-void RenderingSystem::DoTessPass(float /*totalTime*/)
+
+void RenderingSystem::DoTessPass(float totalTime)
 {
     if (!m_tessReady) return;
 
-    // Обновляем CB
     TessCBData cb{};
     XMMATRIX world = XMMatrixIdentity();
     XMMATRIX view = XMMatrixLookAtLH(
@@ -1019,6 +918,7 @@ void RenderingSystem::DoTessPass(float /*totalTime*/)
     cb.MaxDist = 1500.f;
     cb.MinTessFactor = 1.f;
     cb.MaxTessFactor = 16.f;
+    cb.TotalTime = totalTime;
 
     UINT8* slot = m_tessCBMapped + m_frameIndex * m_tessCBSlotSize;
     memcpy(slot, &cb, sizeof(cb));
@@ -1028,14 +928,12 @@ void RenderingSystem::DoTessPass(float /*totalTime*/)
     m_cmdList->SetPipelineState(m_tessWireframe ? m_tessWirePSO.Get() : m_tessPSO.Get());
     m_cmdList->SetGraphicsRootSignature(m_tessRS.Get());
 
-    // Тесселяция требует 3-control-point patch list
     m_cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST);
     m_cmdList->IASetVertexBuffers(0, 1, &m_tessVBView);
     m_cmdList->IASetIndexBuffer(&m_tessIBView);
 
     m_cmdList->SetGraphicsRootConstantBufferView(0, cbAddr);
 
-    // Биндим displacement + normal map
     CD3DX12_GPU_DESCRIPTOR_HANDLE srvH(
         m_srvHeap->GetGPUDescriptorHandleForHeapStart(),
         m_tessDispSRV, m_srvDescSize);

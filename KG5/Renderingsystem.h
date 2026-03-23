@@ -90,6 +90,8 @@ struct TessCBData
     float      MaxDist;
     float      MinTessFactor;
     float      MaxTessFactor;
+    float      TotalTime;
+    float      Pad[3];
 };
 
 // ============================================================================
