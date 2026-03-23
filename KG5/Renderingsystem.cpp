@@ -136,7 +136,7 @@ void RenderingSystem::CreateDescriptorHeaps()
     {
         D3D12_DESCRIPTOR_HEAP_DESC d{};
         d.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-        d.NumDescriptors = 1 + MAX_TEXTURES + GBuffer::RT_COUNT + 2; // +2 для тесселяции
+        d.NumDescriptors = 1 + MAX_TEXTURES + GBuffer::RT_COUNT + 3; // +3 для тесселяции
         d.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
         ThrowIfFailed(m_device->CreateDescriptorHeap(&d, IID_PPV_ARGS(&m_srvHeap)));
         m_srvDescSize = m_device->GetDescriptorHandleIncrementSize(
@@ -774,7 +774,7 @@ void RenderingSystem::CreateTessRootSignature()
     if (!m_tessVS) return;
 
     CD3DX12_DESCRIPTOR_RANGE srvRange;
-    srvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 0);
+    srvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, 0); // disp + normal + color
 
     CD3DX12_ROOT_PARAMETER params[2];
     params[0].InitAsConstantBufferView(0);
@@ -861,6 +861,7 @@ void RenderingSystem::CreateTessCB()
 // ============================================================================
 bool RenderingSystem::LoadTessPlane(const std::wstring& dispPath,
     const std::wstring& normalPath,
+    const std::wstring& colorPath,
     XMFLOAT3 center, float size,
     float displacementScale)
 {
@@ -870,7 +871,7 @@ bool RenderingSystem::LoadTessPlane(const std::wstring& dispPath,
     m_tessDispScale = displacementScale;
 
     // Генерируем сетку N x N квадратов, каждый квад = 2 патча-треугольника
-    const int N = 32;
+    const int N = 64;
     float half = size * 0.5f;
     float step = size / N;
 
@@ -928,6 +929,7 @@ bool RenderingSystem::LoadTessPlane(const std::wstring& dispPath,
     // Displacement map — слот MAX_TEXTURES+RT_COUNT+1
     int dispSlot = MAX_TEXTURES + GBuffer::RT_COUNT + 1;
     int normSlot = dispSlot + 1;
+    int colorSlot = dispSlot + 2;
 
     TextureLoader::TextureData td;
 
@@ -963,6 +965,21 @@ bool RenderingSystem::LoadTessPlane(const std::wstring& dispPath,
         m_tessNormSRV = normSlot;
     }
 
+    if (TextureLoader::LoadFromFile(colorPath, td) &&
+        TextureLoader::CreateTexture(m_device.Get(), m_cmdList.Get(),
+            td, m_tessColorTex, m_tessColorUpload))
+    {
+        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        srvDesc.Format = td.format;
+        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+        srvDesc.Texture2D.MipLevels = 1;
+        CD3DX12_CPU_DESCRIPTOR_HANDLE h(
+            m_srvHeap->GetCPUDescriptorHandleForHeapStart(), colorSlot, m_srvDescSize);
+        m_device->CreateShaderResourceView(m_tessColorTex.Get(), &srvDesc, h);
+        m_tessColorSRV = colorSlot;
+    }
+
     ThrowIfFailed(m_cmdList->Close());
     ID3D12CommandList* cmds[] = { m_cmdList.Get() };
     m_cmdQueue->ExecuteCommandLists(1, cmds);
@@ -970,6 +987,7 @@ bool RenderingSystem::LoadTessPlane(const std::wstring& dispPath,
 
     m_tessDispUpload.Reset();
     m_tessNormUpload.Reset();
+    m_tessColorUpload.Reset();
     m_tessReady = (m_tessDispSRV >= 0 && m_tessPSO);
     return m_tessReady;
 }

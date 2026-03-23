@@ -168,10 +168,10 @@ public:
         m_renderer.SetTexScroll(1.0f, 0.3f);
 
         // Тесселированная плоскость (пол)
-        // Положи displacement.png и normal.png рядом с .exe
         m_renderer.LoadTessPlane(
             L"textures/disp.png",
             L"textures/norm.png",
+            L"textures/color.png",
             { 0.f, 5.f, 0.f },
             1200.f,
             60.f);
@@ -209,7 +209,6 @@ public:
 
             if (m_input.IsKeyDown(VK_ESCAPE)) PostQuitMessage(0);
 
-            // F — переключить wireframe тесселяции
             if (m_input.IsKeyDown('F') && !m_fWasDown)
                 m_renderer.SetWireframe(!m_wireframe), m_wireframe = !m_wireframe;
             m_fWasDown = m_input.IsKeyDown('F');

@@ -129,6 +129,7 @@ public:
     }
 
     bool LoadTessPlane(const std::wstring& dispPath, const std::wstring& normalPath,
+        const std::wstring& colorPath,
         XMFLOAT3 center, float size, float displacementScale = 50.f);
     void SetTessWireframe(bool enabled) { m_tessWireframe = enabled; }
 
@@ -199,8 +200,10 @@ private:
     UINT                     m_tessIndexCount = 0;
     ComPtr<ID3D12Resource>   m_tessDispTex, m_tessDispUpload;
     ComPtr<ID3D12Resource>   m_tessNormTex, m_tessNormUpload;
+    ComPtr<ID3D12Resource>   m_tessColorTex, m_tessColorUpload;
     int                      m_tessDispSRV = -1;
     int                      m_tessNormSRV = -1;
+    int                      m_tessColorSRV = -1;
     float                    m_tessDispScale = 50.f;
     bool                     m_tessReady = false;
 
