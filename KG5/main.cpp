@@ -2,9 +2,11 @@
 #include "RenderingSystem.h"
 #include "Timer.h"
 #include "InputDevice.h"
+#include "InstanceSystem.h"   // <-- новое
 #include <cmath>
 #include <vector>
 #include <cstdlib>
+#include <string>
 
 class FPSCamera
 {
@@ -147,7 +149,7 @@ public:
     {
         srand(12345);
 
-        if (!m_window.Init(hInstance, 1280, 720, L"DX12 Deferred - Bedroom"))
+        if (!m_window.Init(hInstance, 1280, 720, L"DX12 Deferred - Sponza"))
             return false;
 
         m_window.SetResizeCallback([this](int w, int h) {
@@ -163,11 +165,9 @@ public:
             MessageBoxA(nullptr, "Ne udalos zagruzit sponza.obj",
                 "Oshibka", MB_OK | MB_ICONWARNING);
 
-        // Без анимации UV — фотограмметрия не терпит деформации текстур
         m_renderer.SetTexTiling(1.0f, 1.0f);
         m_renderer.SetTexScroll(1.0f, 0.3f);
 
-        // Тесселированная плоскость (пол)
         m_renderer.LoadTessPlane(
             L"textures/disp.png",
             L"textures/norm.png",
@@ -175,6 +175,10 @@ public:
             { 0.f, 5.f, 0.f },
             1200.f,
             60.f);
+
+        // ---- Инициализация системы инстансов ----
+        if (!m_instanceSys.Init(m_renderer.GetDevice()))
+            MessageBoxA(nullptr, "InstanceSystem Init failed", "Warning", MB_OK | MB_ICONWARNING);
 
         m_timer.Reset();
         return true;
@@ -209,9 +213,20 @@ public:
 
             if (m_input.IsKeyDown(VK_ESCAPE)) PostQuitMessage(0);
 
+            // Wireframe (F)
             if (m_input.IsKeyDown('F') && !m_fWasDown)
                 m_renderer.SetWireframe(!m_wireframe), m_wireframe = !m_wireframe;
             m_fWasDown = m_input.IsKeyDown('F');
+
+            // ---- C: переключить frustum culling ----
+            if (m_input.IsKeyDown('C') && !m_cWasDown)
+                m_instanceSys.ToggleFrustumCulling();
+            m_cWasDown = m_input.IsKeyDown('C');
+
+            // ---- V: переключить октодерево (только при включённом culling) ----
+            if (m_input.IsKeyDown('V') && !m_vWasDown)
+                m_instanceSys.ToggleOctree();
+            m_vWasDown = m_input.IsKeyDown('V');
 
             m_camera.Update(m_input, dt);
             m_fallingLights.Update(dt);
@@ -235,7 +250,52 @@ public:
             const float clear[] = { 0.f, 0.f, 0.f, 1.f };
             m_renderer.BeginFrame(clear);
             m_renderer.DrawScene(m_timer.TotalTime(), dt);
+
+            // ---- Рисуем инстансы поверх сцены (форвардный проход) ----
+            {
+                float aspect = (float)m_window.GetWidth() / (float)m_window.GetHeight();
+                XMMATRIX view = XMMatrixLookAtLH(
+                    XMLoadFloat3(&eye),
+                    XMLoadFloat3(&target),
+                    XMLoadFloat3(&up));
+                XMMATRIX proj = XMMatrixPerspectiveFovLH(
+                    XMConvertToRadians(60.f), aspect, 1.f, 10000.f);
+
+                // Направление к источнику (инвертируем dirLight direction)
+                XMFLOAT3 lightDir = { -1.f, 0.1f, 0.f };
+                XMVECTOR ld = XMVector3Normalize(XMLoadFloat3(&lightDir));
+                XMStoreFloat3(&lightDir, ld);
+
+                m_instanceSys.Draw(
+                    m_renderer.GetCmdList(),
+                    m_renderer.GetFrameIndex(),
+                    view, proj,
+                    eye,
+                    lightDir,
+                    { 0.2f, 0.4f, 1.0f },    // цвет направленного света
+                    { 0.02f, 0.02f, 0.03f },  // ambient
+                    m_renderer.GetCurrentBackBufferRTV(),
+                    m_renderer.GetGBufferDSV(),
+                    m_window.GetWidth(),
+                    m_window.GetHeight(),
+                    m_wireframe);
+            }
+
             m_renderer.EndFrame();
+
+            // ---- Обновляем заголовок окна со статистикой culling ----
+            {
+                const wchar_t* fc = m_instanceSys.IsFrustumCullingOn() ? L"ON" : L"OFF";
+                const wchar_t* oc = m_instanceSys.IsOctreeOn() ? L"ON" : L"OFF";
+                wchar_t title[256];
+                swprintf_s(title, 256,
+                    L"DX12 Deferred | Instances: %d/%d | FrustumCulling[C]:%s | Octree[V]:%s",
+                    m_instanceSys.GetVisibleCount(),
+                    InstanceSystem::INSTANCE_COUNT,
+                    fc, oc);
+                SetWindowText(m_window.GetHWND(), title);
+            }
+
             m_input.EndFrame();
         }
     }
@@ -247,8 +307,12 @@ private:
     InputDevice     m_input;
     FPSCamera       m_camera;
     FallingStar     m_fallingLights;
-    bool            m_wireframe = false;
-    bool            m_fWasDown = false;
+    InstanceSystem  m_instanceSys;    // <-- новое
+
+    bool m_wireframe = false;
+    bool m_fWasDown = false;
+    bool m_cWasDown = false;        // <-- новое
+    bool m_vWasDown = false;        // <-- новое
 };
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)

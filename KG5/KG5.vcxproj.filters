@@ -36,6 +36,9 @@
     <ClCompile Include="Gbuffer.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="Instancesystem .cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -62,11 +65,21 @@
     <ClInclude Include="Gbuffer.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="Frustumculler.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Octree.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Instancesystem.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="Lightingshader.hlsl" />
     <None Include="GBufferShader.hlsl" />
     <None Include="TessShader.hlsl" />
+    <None Include="Instanceshader.hlsl" />
   </ItemGroup>
 </Project>

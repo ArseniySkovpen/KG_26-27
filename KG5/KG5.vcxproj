@@ -133,6 +133,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Gbuffer.cpp" />
+    <ClCompile Include="Instancesystem .cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ObjLoader.cpp" />
     <ClCompile Include="Renderingsystem.cpp" />
@@ -141,9 +142,12 @@
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Frustumculler.h" />
     <ClInclude Include="Gbuffer.h" />
     <ClInclude Include="InputDevice.h" />
+    <ClInclude Include="Instancesystem.h" />
     <ClInclude Include="ObjLoader.h" />
+    <ClInclude Include="Octree.h" />
     <ClInclude Include="Renderingsystem.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="TextureLoader.h" />
@@ -171,6 +175,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="TessShader.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Instanceshader.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

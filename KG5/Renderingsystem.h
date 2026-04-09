@@ -91,7 +91,6 @@ struct TessCBData
     float      MinTessFactor;
     float      MaxTessFactor;
     float      TotalTime;
-    float      Pad[3];
 };
 
 // ============================================================================
@@ -137,6 +136,26 @@ public:
 
     void SetWireframe(bool enabled) { m_tessWireframe = enabled; }
 
+
+    // ---- Геттеры для InstanceSystem (новые методы, существующие функции не изменены) ----
+    ID3D12Device* GetDevice()     const { return m_device.Get(); }
+    ID3D12GraphicsCommandList* GetCmdList()    const { return m_cmdList.Get(); }
+    UINT                       GetFrameIndex() const { return m_frameIndex; }
+    int                        GetWidth()      const { return m_width; }
+    int                        GetHeight()     const { return m_height; }
+    XMFLOAT3                   GetEye()        const { return m_eye; }
+
+    ID3D12Resource* GetCurrentBackBuffer() const
+    {
+        return m_renderTargets[m_frameIndex].Get();
+    }
+    D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentBackBufferRTV() const
+    {
+        return CD3DX12_CPU_DESCRIPTOR_HANDLE(
+            m_rtvHeap->GetCPUDescriptorHandleForHeapStart(),
+            m_frameIndex, m_rtvDescSize);
+    }
+    D3D12_CPU_DESCRIPTOR_HANDLE GetGBufferDSV() const { return m_gbuffer.GetDSV(); }
 private:
     void CreateDevice();
     void CreateCommandObjects();
