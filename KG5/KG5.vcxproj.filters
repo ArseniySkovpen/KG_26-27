@@ -39,6 +39,9 @@
     <ClCompile Include="Instancesystem .cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="Billboardsystem.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -74,6 +77,9 @@
     <ClInclude Include="Instancesystem.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="Billboardsystem.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -81,5 +87,7 @@
     <None Include="GBufferShader.hlsl" />
     <None Include="TessShader.hlsl" />
     <None Include="Instanceshader.hlsl" />
+    <None Include="BillboardShader.hlsl" />
+    <None Include="Treeshader.hlsl" />
   </ItemGroup>
 </Project>

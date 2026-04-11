@@ -2,7 +2,8 @@
 #include "RenderingSystem.h"
 #include "Timer.h"
 #include "InputDevice.h"
-#include "InstanceSystem.h"   // <-- новое
+#include "InstanceSystem.h"    // <-- новое
+#include "BillboardSystem.h"  // <-- новое
 #include <cmath>
 #include <vector>
 #include <cstdlib>
@@ -180,6 +181,9 @@ public:
         if (!m_instanceSys.Init(m_renderer.GetDevice()))
             MessageBoxA(nullptr, "InstanceSystem Init failed", "Warning", MB_OK | MB_ICONWARNING);
 
+        if (!m_billboardSys.Init(m_renderer.GetDevice()))
+            MessageBoxA(nullptr, "BillboardSystem Init failed", "Warning", MB_OK | MB_ICONWARNING);
+
         m_timer.Reset();
         return true;
     }
@@ -281,6 +285,32 @@ public:
                     m_wireframe);
             }
 
+            // ---- Рисуем деревья-биллборды вдали ----
+            {
+                float aspect = (float)m_window.GetWidth() / (float)m_window.GetHeight();
+                XMMATRIX view = XMMatrixLookAtLH(
+                    XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
+                XMMATRIX proj = XMMatrixPerspectiveFovLH(
+                    XMConvertToRadians(60.f), aspect, 1.f, 10000.f);
+
+                XMFLOAT3 sunDir = { -1.f, 0.1f, 0.f };
+                XMVECTOR sd = XMVector3Normalize(XMLoadFloat3(&sunDir));
+                XMStoreFloat3(&sunDir, sd);
+
+                m_billboardSys.Draw(
+                    m_renderer.GetCmdList(),
+                    m_renderer.GetFrameIndex(),
+                    view, proj,
+                    eye,
+                    sunDir,
+                    { 0.2f, 0.4f, 1.0f },
+                    { 0.02f, 0.02f, 0.03f },
+                    m_renderer.GetCurrentBackBufferRTV(),
+                    m_renderer.GetGBufferDSV(),
+                    m_window.GetWidth(),
+                    m_window.GetHeight());
+            }
+
             m_renderer.EndFrame();
 
             // ---- Обновляем заголовок окна со статистикой culling ----
@@ -289,9 +319,9 @@ public:
                 const wchar_t* oc = m_instanceSys.IsOctreeOn() ? L"ON" : L"OFF";
                 wchar_t title[256];
                 swprintf_s(title, 256,
-                    L"DX12 Deferred | Instances: %d/%d | FrustumCulling[C]:%s | Octree[V]:%s",
-                    m_instanceSys.GetVisibleCount(),
-                    InstanceSystem::INSTANCE_COUNT,
+                    L"DX12 Deferred | Cubes: %d/%d | Trees: %d/%d | FrustumCulling[C]:%s | Octree[V]:%s",
+                    m_instanceSys.GetVisibleCount(), InstanceSystem::INSTANCE_COUNT,
+                    m_billboardSys.GetVisibleCount(), BillboardSystem::TREE_COUNT,
                     fc, oc);
                 SetWindowText(m_window.GetHWND(), title);
             }
@@ -307,12 +337,13 @@ private:
     InputDevice     m_input;
     FPSCamera       m_camera;
     FallingStar     m_fallingLights;
-    InstanceSystem  m_instanceSys;    // <-- новое
+    InstanceSystem  m_instanceSys;
+    BillboardSystem m_billboardSys; 
 
     bool m_wireframe = false;
     bool m_fWasDown = false;
-    bool m_cWasDown = false;        // <-- новое
-    bool m_vWasDown = false;        // <-- новое
+    bool m_cWasDown = false;        
+    bool m_vWasDown = false;        
 };
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)

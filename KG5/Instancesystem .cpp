@@ -1,11 +1,11 @@
-#include "InstanceSystem.h"
+п»ї#include "InstanceSystem.h"
 #include <stdexcept>
 #include <cstdlib>
 #include <cmath>
 
 // ----------------------------------------------------------------
-// Куб: 24 вершины (по 4 на грань, чтобы нормали были правильными),
-// 36 индексов.  Каждая вершина — float3 позиция + float3 нормаль.
+// РљСѓР±: 24 РІРµСЂС€РёРЅС‹ (РїРѕ 4 РЅР° РіСЂР°РЅСЊ, С‡С‚РѕР±С‹ РЅРѕСЂРјР°Р»Рё Р±С‹Р»Рё РїСЂР°РІРёР»СЊРЅС‹РјРё),
+// 36 РёРЅРґРµРєСЃРѕРІ.  РљР°Р¶РґР°СЏ РІРµСЂС€РёРЅР° вЂ” float3 РїРѕР·РёС†РёСЏ + float3 РЅРѕСЂРјР°Р»СЊ.
 // ----------------------------------------------------------------
 struct CubeVert { float x, y, z, nx, ny, nz; };
 
@@ -36,7 +36,7 @@ static const UINT CUBE_INDICES[36] =
 };
 
 // ----------------------------------------------------------------
-// Вспомогательная функция: создаём буфер на upload heap
+// Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅР°СЏ С„СѓРЅРєС†РёСЏ: СЃРѕР·РґР°С‘Рј Р±СѓС„РµСЂ РЅР° upload heap
 // ----------------------------------------------------------------
 static ComPtr<ID3D12Resource> CreateUploadBuffer(ID3D12Device* device, UINT64 size)
 {
@@ -67,7 +67,15 @@ bool InstanceSystem::Init(ID3D12Device* device,
 }
 
 // ----------------------------------------------------------------
-// Генерируем инстансы: кубы разбросаны по полу Sponza
+// Р“РµРЅРµСЂРёСЂСѓРµРј РёРЅСЃС‚Р°РЅСЃС‹: РєСѓР±С‹ СЂР°Р·Р±СЂРѕСЃР°РЅС‹ РїРѕ РІСЃРµРјСѓ РѕР±СЉС‘РјСѓ Sponza.
+//
+// Sponza layout (РїСЂРёР±Р»РёР·РёС‚РµР»СЊРЅРѕ):
+//   X: -380 .. +380  (РґР»РёРЅР° Р°С‚СЂРёСѓРјР°)
+//   Y:    5 .. +420  (РѕС‚ РїРѕР»Р° РґРѕ РїРѕС‚РѕР»РєР°, РЅРµСЃРєРѕР»СЊРєРѕ СЏСЂСѓСЃРѕРІ)
+//   Z:  -90 .. +90   (С€РёСЂРёРЅР° Р°С‚СЂРёСѓРјР°)
+//
+// Р Р°СЃРїСЂРµРґРµР»РµРЅРёРµ РїРѕ Y СЂР°Р·Р±РёС‚Рѕ РЅР° С‚СЂРё В«СЌС‚Р°Р¶Р°В», С‡С‚РѕР±С‹ РєСѓР±С‹
+// РІСЃС‚СЂРµС‡Р°Р»РёСЃСЊ РЅР° РїРѕР»Сѓ, РЅР° Р±Р°Р»РєРѕРЅР°С… Рё РїРѕРґ РїРѕС‚РѕР»РєРѕРј.
 // ----------------------------------------------------------------
 void InstanceSystem::GenerateInstances()
 {
@@ -76,47 +84,79 @@ void InstanceSystem::GenerateInstances()
     m_instances.reserve(INSTANCE_COUNT);
     m_aabbs.reserve(INSTANCE_COUNT);
 
-    // Sponza: ширина ~760 ед, глубина ~200 ед, пол на y?5
-    for (int i = 0; i < INSTANCE_COUNT; ++i)
+    // Р“СЂР°РЅРёС†С‹ СЃС†РµРЅС‹
+    const float X_MIN = -370.f, X_MAX = 370.f;
+    const float Z_MIN = -85.f, Z_MAX = 85.f;
+
+    // РўСЂРё РІС‹СЃРѕС‚РЅС‹С… РґРёР°РїР°Р·РѕРЅР° Рё РёС… РІРµСЃР° (СЃРєРѕР»СЊРєРѕ РєСѓР±РѕРІ РЅР° РєР°Р¶РґС‹Р№ СЏСЂСѓСЃ)
+    struct Layer { float yMin, yMax; int count; };
+    const Layer LAYERS[] = {
+        {   5.f, 100.f, 1000 },  // РїРѕР» Рё РЅРёР¶РЅРёР№ СЏСЂСѓСЃ
+        { 120.f, 260.f,  600 },  // Р±Р°Р»РєРѕРЅРЅС‹Р№ СЏСЂСѓСЃ
+        { 280.f, 410.f,  400 },  // РІРµСЂС…РЅРёР№ СЏСЂСѓСЃ / РїРѕРґ РїРѕС‚РѕР»РєРѕРј
+    };
+
+    for (const auto& layer : LAYERS)
     {
-        float rx = (float)rand() / RAND_MAX;  // [0,1]
-        float rz = (float)rand() / RAND_MAX;
+        for (int i = 0; i < layer.count; ++i)
+        {
+            float rx = (float)rand() / RAND_MAX;
+            float ry = (float)rand() / RAND_MAX;
+            float rz = (float)rand() / RAND_MAX;
 
-        InstanceRecord inst{};
-        inst.Position.x = -380.f + rx * 760.f;
-        inst.Position.y = 5.f;
-        inst.Position.z = -90.f + rz * 180.f;
-        inst.Scale = 8.f + (float)rand() / RAND_MAX * 12.f; // 8..20 ед
+            InstanceRecord inst{};
+            inst.Position.x = X_MIN + rx * (X_MAX - X_MIN);
+            inst.Position.y = layer.yMin + ry * (layer.yMax - layer.yMin);
+            inst.Position.z = Z_MIN + rz * (Z_MAX - Z_MIN);
 
-        // Случайный тёплый оттенок
-        inst.Color.x = 0.4f + (float)rand() / RAND_MAX * 0.6f;
-        inst.Color.y = 0.2f + (float)rand() / RAND_MAX * 0.5f;
-        inst.Color.z = 0.1f + (float)rand() / RAND_MAX * 0.3f;
-        inst.Pad = 0.f;
+            // РњРµР»РєРёРµ РєСѓР±С‹ РЅР° РІРµСЂС…РЅРёС… СЏСЂСѓСЃР°С… РІС‹РіР»СЏРґСЏС‚ РѕСЂРіР°РЅРёС‡РЅРµРµ
+            float sizeRange = (layer.yMin < 110.f) ? 12.f : 7.f;
+            float sizeBase = (layer.yMin < 110.f) ? 8.f : 4.f;
+            inst.Scale = sizeBase + (float)rand() / RAND_MAX * sizeRange;
 
-        // Куб: единичный [-1,1], умноженный на Scale => [-S,S].
-        // Центр по Y поднят на Scale, чтобы стоял на полу.
-        float s = inst.Scale;
-        float cx = inst.Position.x;
-        float cy = inst.Position.y + s;        // центр куба над полом
-        float cz = inst.Position.z;
+            // Р¦РІРµС‚ РјРµРЅСЏРµС‚СЃСЏ РїРѕ СЏСЂСѓСЃР°Рј:
+            // РЅРёР·  вЂ” С‚С‘РїР»С‹Рµ РєСЂР°СЃРЅРѕ-РѕСЂР°РЅР¶РµРІС‹Рµ
+            // Р±Р°Р»РєРѕРЅ вЂ” Р·РµР»РµРЅРѕРІР°С‚Рѕ-РіРѕР»СѓР±С‹Рµ
+            // РІРµСЂС…   вЂ” С…РѕР»РѕРґРЅС‹Рµ СЃРёРЅРёРµ
+            if (layer.yMin < 110.f) {
+                inst.Color = { 0.6f + (float)rand() / RAND_MAX * 0.4f,
+                               0.2f + (float)rand() / RAND_MAX * 0.3f,
+                               0.05f + (float)rand() / RAND_MAX * 0.15f };
+            }
+            else if (layer.yMin < 270.f) {
+                inst.Color = { 0.1f + (float)rand() / RAND_MAX * 0.3f,
+                               0.5f + (float)rand() / RAND_MAX * 0.4f,
+                               0.2f + (float)rand() / RAND_MAX * 0.4f };
+            }
+            else {
+                inst.Color = { 0.1f + (float)rand() / RAND_MAX * 0.2f,
+                               0.2f + (float)rand() / RAND_MAX * 0.3f,
+                               0.6f + (float)rand() / RAND_MAX * 0.4f };
+            }
+            inst.Pad = 0.f;
 
-        inst.BoundingBox.Min = { cx - s, cy - s, cz - s };
-        inst.BoundingBox.Max = { cx + s, cy + s, cz + s };
+            float s = inst.Scale;
+            float cx = inst.Position.x;
+            float cy = inst.Position.y;  // Y СѓР¶Рµ СЃР»СѓС‡Р°Р№РЅС‹Р№ РІРЅСѓС‚СЂРё СЏСЂСѓСЃР°
+            float cz = inst.Position.z;
 
-        m_aabbs.push_back(inst.BoundingBox);
-        m_instances.push_back(inst);
+            inst.BoundingBox.Min = { cx - s, cy - s, cz - s };
+            inst.BoundingBox.Max = { cx + s, cy + s, cz + s };
+
+            m_aabbs.push_back(inst.BoundingBox);
+            m_instances.push_back(inst);
+        }
     }
 
-    // Строим октодерево по всему набору AABB
+    // РЎС‚СЂРѕРёРј РѕРєС‚РѕРґРµСЂРµРІРѕ РїРѕ РІСЃРµРјСѓ РѕР±СЉС‘РјСѓ СЃС†РµРЅС‹
     AABB scene;
-    scene.Min = { -400.f, -10.f, -120.f };
-    scene.Max = { 400.f, 500.f,  120.f };
+    scene.Min = { -400.f,  -10.f, -120.f };
+    scene.Max = { 400.f,  430.f,  120.f };
     m_octree.Build(m_aabbs, scene);
 }
 
 // ----------------------------------------------------------------
-// Загружаем куб в upload-буферы (без отдельного cmdList)
+// Р—Р°РіСЂСѓР¶Р°РµРј РєСѓР± РІ upload-Р±СѓС„РµСЂС‹ (Р±РµР· РѕС‚РґРµР»СЊРЅРѕРіРѕ cmdList)
 // ----------------------------------------------------------------
 bool InstanceSystem::CreateGeometry(ID3D12Device* device)
 {
@@ -127,7 +167,7 @@ bool InstanceSystem::CreateGeometry(ID3D12Device* device)
     m_cubeIB = CreateUploadBuffer(device, ibSize);
     if (!m_cubeVB || !m_cubeIB) return false;
 
-    // Записываем вершины
+    // Р—Р°РїРёСЃС‹РІР°РµРј РІРµСЂС€РёРЅС‹
     void* ptr = nullptr;
     m_cubeVB->Map(0, nullptr, &ptr);
     memcpy(ptr, CUBE_VERTS, vbSize);
@@ -156,7 +196,7 @@ bool InstanceSystem::CreatePipeline(ID3D12Device* device,
     DXGI_FORMAT rtFmt,
     DXGI_FORMAT dsFmt)
 {
-    // ---------- Компилируем шейдеры ----------
+    // ---------- РљРѕРјРїРёР»РёСЂСѓРµРј С€РµР№РґРµСЂС‹ ----------
     UINT flags = 0;
 #if defined(_DEBUG)
     flags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
@@ -178,7 +218,7 @@ bool InstanceSystem::CreatePipeline(ID3D12Device* device,
         return false;
     }
 
-    // ---------- Root signature: один Root CBV (b0) ----------
+    // ---------- Root signature: РѕРґРёРЅ Root CBV (b0) ----------
     CD3DX12_ROOT_PARAMETER params[1];
     params[0].InitAsConstantBufferView(0, 0, D3D12_SHADER_VISIBILITY_ALL);
 
@@ -199,7 +239,7 @@ bool InstanceSystem::CreatePipeline(ID3D12Device* device,
         // Stream 0: per-vertex
         { "POSITION",  0, DXGI_FORMAT_R32G32B32_FLOAT, 0,  0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,   0 },
         { "NORMAL",    0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA,   0 },
-        // Stream 1: per-instance (мировая матрица — 4 ? float4 + float4 цвет)
+        // Stream 1: per-instance (РјРёСЂРѕРІР°СЏ РјР°С‚СЂРёС†Р° вЂ” 4 Г— float4 + float4 С†РІРµС‚)
         { "INST_WORLD", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1,  0, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 },
         { "INST_WORLD", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 },
         { "INST_WORLD", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 32, D3D12_INPUT_CLASSIFICATION_PER_INSTANCE_DATA, 1 },
@@ -220,13 +260,13 @@ bool InstanceSystem::CreatePipeline(ID3D12Device* device,
     psoDesc.SampleDesc = { 1, 0 };
     psoDesc.SampleMask = UINT_MAX;
 
-    // Растеризатор — сплошной
+    // Р Р°СЃС‚РµСЂРёР·Р°С‚РѕСЂ вЂ” СЃРїР»РѕС€РЅРѕР№
     psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 
-    // Blend — непрозрачный
+    // Blend вЂ” РЅРµРїСЂРѕР·СЂР°С‡РЅС‹Р№
     psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
 
-    // Depth: тест включён, запись включена (инстансы перекрывают друг друга корректно)
+    // Depth: С‚РµСЃС‚ РІРєР»СЋС‡С‘РЅ, Р·Р°РїРёСЃСЊ РІРєР»СЋС‡РµРЅР° (РёРЅСЃС‚Р°РЅСЃС‹ РїРµСЂРµРєСЂС‹РІР°СЋС‚ РґСЂСѓРі РґСЂСѓРіР° РєРѕСЂСЂРµРєС‚РЅРѕ)
     psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
     psoDesc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 
@@ -243,12 +283,12 @@ bool InstanceSystem::CreatePipeline(ID3D12Device* device,
 }
 
 // ----------------------------------------------------------------
-// Динамические буферы (один на кадр, постоянно замаплены)
+// Р”РёРЅР°РјРёС‡РµСЃРєРёРµ Р±СѓС„РµСЂС‹ (РѕРґРёРЅ РЅР° РєР°РґСЂ, РїРѕСЃС‚РѕСЏРЅРЅРѕ Р·Р°РјР°РїР»РµРЅС‹)
 // ----------------------------------------------------------------
 bool InstanceSystem::CreateDynamicBuffers(ID3D12Device* device)
 {
     const UINT64 instBufSize = (UINT64)sizeof(InstanceGPUData) * MAX_INSTANCES;
-    const UINT64 cbSize = sizeof(InstanceFrameCB);    // уже выровнен до 256
+    const UINT64 cbSize = sizeof(InstanceFrameCB);    // СѓР¶Рµ РІС‹СЂРѕРІРЅРµРЅ РґРѕ 256
 
     for (int f = 0; f < FRAME_COUNT; ++f)
     {
@@ -264,7 +304,7 @@ bool InstanceSystem::CreateDynamicBuffers(ID3D12Device* device)
 }
 
 // ================================================================
-// Draw — вызывается между DrawScene() и EndFrame()
+// Draw вЂ” РІС‹Р·С‹РІР°РµС‚СЃСЏ РјРµР¶РґСѓ DrawScene() Рё EndFrame()
 // ================================================================
 void InstanceSystem::Draw(
     ID3D12GraphicsCommandList* cmdList,
@@ -288,19 +328,19 @@ void InstanceSystem::Draw(
 
     if (!m_useFrustum)
     {
-        // Без отсечения: все инстансы
+        // Р‘РµР· РѕС‚СЃРµС‡РµРЅРёСЏ: РІСЃРµ РёРЅСЃС‚Р°РЅСЃС‹
         visible.resize(INSTANCE_COUNT);
         for (int i = 0; i < INSTANCE_COUNT; ++i) visible[i] = i;
     }
     else if (m_useOctree)
     {
-        // Frustum culling через октодерево
+        // Frustum culling С‡РµСЂРµР· РѕРєС‚РѕРґРµСЂРµРІРѕ
         Frustum f = ExtractFrustum(vp);
         m_octree.Query(f, visible);
     }
     else
     {
-        // Прямой перебор AABB без октодерева
+        // РџСЂСЏРјРѕР№ РїРµСЂРµР±РѕСЂ AABB Р±РµР· РѕРєС‚РѕРґРµСЂРµРІР°
         Frustum f = ExtractFrustum(vp);
         visible.reserve(INSTANCE_COUNT);
         for (int i = 0; i < INSTANCE_COUNT; ++i)
@@ -311,7 +351,7 @@ void InstanceSystem::Draw(
 
     if (m_visibleCount == 0) return;
 
-    // ---------- 2. Заполняем instance buffer текущего кадра ----------
+    // ---------- 2. Р—Р°РїРѕР»РЅСЏРµРј instance buffer С‚РµРєСѓС‰РµРіРѕ РєР°РґСЂР° ----------
     const UINT fi = frameIndex % FRAME_COUNT;
 
     for (int k = 0; k < m_visibleCount; ++k)
@@ -319,14 +359,14 @@ void InstanceSystem::Draw(
         const InstanceRecord& rec = m_instances[visible[k]];
         float s = rec.Scale;
         float cx = rec.Position.x;
-        float cy = rec.Position.y + s;   // центр над полом
+        float cy = rec.Position.y;        // С†РµРЅС‚СЂ СѓР¶Рµ Р·Р°РґР°РЅ СЃР»СѓС‡Р°Р№РЅРѕ РІРЅСѓС‚СЂРё СЏСЂСѓСЃР°
         float cz = rec.Position.z;
 
-        // Масштаб + перенос (без вращения)
+        // РњР°СЃС€С‚Р°Р± + РїРµСЂРµРЅРѕСЃ (Р±РµР· РІСЂР°С‰РµРЅРёСЏ)
         XMMATRIX world = XMMatrixScaling(s, s, s) * XMMatrixTranslation(cx, cy, cz);
 
         XMFLOAT4X4 w;
-        XMStoreFloat4x4(&w, world);   // row-major — строки идут в World0..3
+        XMStoreFloat4x4(&w, world);   // row-major вЂ” СЃС‚СЂРѕРєРё РёРґСѓС‚ РІ World0..3
 
         InstanceGPUData& g = m_instMapped[fi][k];
         g.World0 = { w._11, w._12, w._13, w._14 };
@@ -337,7 +377,7 @@ void InstanceSystem::Draw(
         g.Pad = 0.f;
     }
 
-    // ---------- 3. Обновляем constant buffer ----------
+    // ---------- 3. РћР±РЅРѕРІР»СЏРµРј constant buffer ----------
     InstanceFrameCB& cb = *m_cbMapped[fi];
     XMStoreFloat4x4(&cb.View, XMMatrixTranspose(view));
     XMStoreFloat4x4(&cb.Proj, XMMatrixTranspose(proj));
@@ -346,7 +386,7 @@ void InstanceSystem::Draw(
     cb.LightColor = lightColor;
     cb.Ambient = ambient;
 
-    // ---------- 4. Настраиваем Pipeline ----------
+    // ---------- 4. РќР°СЃС‚СЂР°РёРІР°РµРј Pipeline ----------
     cmdList->SetPipelineState(wireframe ? m_psowire.Get() : m_pso.Get());
     cmdList->SetGraphicsRootSignature(m_rootSig.Get());
     cmdList->SetGraphicsRootConstantBufferView(0, m_cb[fi]->GetGPUVirtualAddress());
@@ -359,7 +399,7 @@ void InstanceSystem::Draw(
     cmdList->RSSetViewports(1, &vp2);
     cmdList->RSSetScissorRects(1, &sc);
 
-    // ---------- 6. Вершинный / индексный буферы ----------
+    // ---------- 6. Р’РµСЂС€РёРЅРЅС‹Р№ / РёРЅРґРµРєСЃРЅС‹Р№ Р±СѓС„РµСЂС‹ ----------
     cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     D3D12_VERTEX_BUFFER_VIEW vbs[2] = { m_cubeVBView, {} };
