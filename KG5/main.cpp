@@ -2,8 +2,9 @@
 #include "RenderingSystem.h"
 #include "Timer.h"
 #include "InputDevice.h"
-#include "InstanceSystem.h"    // <-- новое
-#include "BillboardSystem.h"  // <-- новое
+#include "InstanceSystem.h"
+#include "BillboardSystem.h"
+#include "ParticleSystem.h"
 #include <cmath>
 #include <vector>
 #include <cstdlib>
@@ -177,12 +178,18 @@ public:
             1200.f,
             60.f);
 
-        // ---- Инициализация системы инстансов ----
         if (!m_instanceSys.Init(m_renderer.GetDevice()))
             MessageBoxA(nullptr, "InstanceSystem Init failed", "Warning", MB_OK | MB_ICONWARNING);
 
         if (!m_billboardSys.Init(m_renderer.GetDevice()))
             MessageBoxA(nullptr, "BillboardSystem Init failed", "Warning", MB_OK | MB_ICONWARNING);
+
+        if (!m_particleSys.Init(m_renderer.GetDevice()))
+            MessageBoxA(nullptr,
+                "ParticleSystem Init failed.\n"
+                "Make sure ParticleComputeShaders.hlsl and\n"
+                "ParticleRenderShaders.hlsl are next to .exe",
+                "Warning", MB_OK | MB_ICONWARNING);
 
         m_timer.Reset();
         return true;
@@ -217,17 +224,14 @@ public:
 
             if (m_input.IsKeyDown(VK_ESCAPE)) PostQuitMessage(0);
 
-            // Wireframe (F)
             if (m_input.IsKeyDown('F') && !m_fWasDown)
                 m_renderer.SetWireframe(!m_wireframe), m_wireframe = !m_wireframe;
             m_fWasDown = m_input.IsKeyDown('F');
 
-            // ---- C: переключить frustum culling ----
             if (m_input.IsKeyDown('C') && !m_cWasDown)
                 m_instanceSys.ToggleFrustumCulling();
             m_cWasDown = m_input.IsKeyDown('C');
 
-            // ---- V: переключить октодерево (только при включённом culling) ----
             if (m_input.IsKeyDown('V') && !m_vWasDown)
                 m_instanceSys.ToggleOctree();
             m_vWasDown = m_input.IsKeyDown('V');
@@ -255,7 +259,7 @@ public:
             m_renderer.BeginFrame(clear);
             m_renderer.DrawScene(m_timer.TotalTime(), dt);
 
-            // ---- Рисуем инстансы поверх сцены (форвардный проход) ----
+            // ---- Cube instances ----
             {
                 float aspect = (float)m_window.GetWidth() / (float)m_window.GetHeight();
                 XMMATRIX view = XMMatrixLookAtLH(
@@ -265,7 +269,6 @@ public:
                 XMMATRIX proj = XMMatrixPerspectiveFovLH(
                     XMConvertToRadians(60.f), aspect, 1.f, 10000.f);
 
-                // Направление к источнику (инвертируем dirLight direction)
                 XMFLOAT3 lightDir = { -1.f, 0.1f, 0.f };
                 XMVECTOR ld = XMVector3Normalize(XMLoadFloat3(&lightDir));
                 XMStoreFloat3(&lightDir, ld);
@@ -273,11 +276,9 @@ public:
                 m_instanceSys.Draw(
                     m_renderer.GetCmdList(),
                     m_renderer.GetFrameIndex(),
-                    view, proj,
-                    eye,
-                    lightDir,
-                    { 0.2f, 0.4f, 1.0f },    // цвет направленного света
-                    { 0.02f, 0.02f, 0.03f },  // ambient
+                    view, proj, eye, lightDir,
+                    { 0.2f, 0.4f, 1.0f },
+                    { 0.02f, 0.02f, 0.03f },
                     m_renderer.GetCurrentBackBufferRTV(),
                     m_renderer.GetGBufferDSV(),
                     m_window.GetWidth(),
@@ -285,7 +286,7 @@ public:
                     m_wireframe);
             }
 
-            // ---- Рисуем деревья-биллборды вдали ----
+            // ---- Trees ----
             {
                 float aspect = (float)m_window.GetWidth() / (float)m_window.GetHeight();
                 XMMATRIX view = XMMatrixLookAtLH(
@@ -300,9 +301,7 @@ public:
                 m_billboardSys.Draw(
                     m_renderer.GetCmdList(),
                     m_renderer.GetFrameIndex(),
-                    view, proj,
-                    eye,
-                    sunDir,
+                    view, proj, eye, sunDir,
                     { 0.2f, 0.4f, 1.0f },
                     { 0.02f, 0.02f, 0.03f },
                     m_renderer.GetCurrentBackBufferRTV(),
@@ -311,18 +310,41 @@ public:
                     m_window.GetHeight());
             }
 
+            // ---- Particle fountain ----
+            {
+                float aspect = (float)m_window.GetWidth() / (float)m_window.GetHeight();
+                XMMATRIX view = XMMatrixLookAtLH(
+                    XMLoadFloat3(&eye), XMLoadFloat3(&target), XMLoadFloat3(&up));
+                XMMATRIX proj = XMMatrixPerspectiveFovLH(
+                    XMConvertToRadians(60.f), aspect, 1.f, 10000.f);
+
+                XMFLOAT3 fountainPos = { -487.f, 26.f, 7.f };
+
+                m_particleSys.UpdateAndDraw(
+                    m_renderer.GetCmdList(),
+                    m_renderer.GetFrameIndex(),
+                    dt, m_timer.TotalTime(),
+                    view, proj, eye,
+                    fountainPos,
+                    /*emitCount per frame*/ 64,
+                    m_renderer.GetCurrentBackBufferRTV(),
+                    m_renderer.GetGBufferDSV(),
+                    m_window.GetWidth(),
+                    m_window.GetHeight());
+            }
+
             m_renderer.EndFrame();
 
-            // ---- Обновляем заголовок окна со статистикой culling ----
+            // ---- Title ----
             {
                 const wchar_t* fc = m_instanceSys.IsFrustumCullingOn() ? L"ON" : L"OFF";
                 const wchar_t* oc = m_instanceSys.IsOctreeOn() ? L"ON" : L"OFF";
-                wchar_t title[256];
-                swprintf_s(title, 256,
-                    L"DX12 Deferred | Cubes: %d/%d | Trees: %d/%d | FrustumCulling[C]:%s | Octree[V]:%s",
+                wchar_t title[384];
+                swprintf_s(title, 384,
+                    L"DX12 | Cubes:%d/%d | Trees:%d/%d | FC[C]:%s OC[V]:%s | Particles:%u",
                     m_instanceSys.GetVisibleCount(), InstanceSystem::INSTANCE_COUNT,
                     m_billboardSys.GetVisibleCount(), BillboardSystem::TREE_COUNT,
-                    fc, oc);
+                    fc, oc, m_particleSys.GetLastAliveCount());
                 SetWindowText(m_window.GetHWND(), title);
             }
 
@@ -338,12 +360,13 @@ private:
     FPSCamera       m_camera;
     FallingStar     m_fallingLights;
     InstanceSystem  m_instanceSys;
-    BillboardSystem m_billboardSys; 
+    BillboardSystem m_billboardSys;
+    ParticleSystem  m_particleSys;
 
     bool m_wireframe = false;
     bool m_fWasDown = false;
-    bool m_cWasDown = false;        
-    bool m_vWasDown = false;        
+    bool m_cWasDown = false;
+    bool m_vWasDown = false;
 };
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)

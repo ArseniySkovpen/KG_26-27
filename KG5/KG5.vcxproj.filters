@@ -42,6 +42,9 @@
     <ClCompile Include="Billboardsystem.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="Particlesystem.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -80,6 +83,9 @@
     <ClInclude Include="Billboardsystem.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="Particlesystem.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -89,5 +95,7 @@
     <None Include="Instanceshader.hlsl" />
     <None Include="BillboardShader.hlsl" />
     <None Include="Treeshader.hlsl" />
+    <None Include="Particlerendershaders.hlsl" />
+    <None Include="Particlecomputeshaders.hlsl" />
   </ItemGroup>
 </Project>
