@@ -1,9 +1,19 @@
 // ============================================================================
-// LightingShader.hlsl — Lighting Pass
+// LightingShader.hlsl - Lighting Pass with Cascaded Shadow Maps
 // ============================================================================
 
 #define MAX_POINT_LIGHTS 16
 #define MAX_SPOT_LIGHTS   4
+#define CSM_CASCADE_COUNT 3
+#define CSM_TEXEL_SIZE   (1.0f / 1024.0f)
+
+// Поставь 1 чтобы раскрасить пиксели по номеру каскада (отладка).
+// Красный = каскад 0, зелёный = 1, синий = 2.
+// Если видишь цветные зоны - каскады считаются правильно.
+#define CSM_DEBUG_CASCADES 0
+
+// Небольшой bias в сравнении глубины (борьба с shadow acne).
+#define CSM_DEPTH_BIAS 0.0015f
 
 struct PointLight
 {
@@ -28,12 +38,20 @@ cbuffer LightingCB : register(b0)
     int gNumPointLights;
     int gNumSpotLights;
     int gPad0, gPad1;
+
+    // CSM
+    float4x4 gCsmView;
+    float4x4 gCsmLightViewProj[CSM_CASCADE_COUNT];
+    float4 gCsmCascadeFar; // .xyz = far view-Z per cascade
 };
 
 Texture2D gAlbedoMap : register(t0);
 Texture2D gNormalMap : register(t1);
 Texture2D gPositionMap : register(t2);
+Texture2DArray<float> gShadowMap : register(t3);
+
 SamplerState gSampler : register(s0);
+SamplerComparisonState gShadowSampler : register(s1);
 
 struct VSOutput
 {
@@ -50,6 +68,55 @@ VSOutput VSMain(uint id : SV_VertexID)
     return o;
 }
 
+// ----- CSM sampling with PCF 3x3 -----
+int PickCascade(float3 worldPos)
+{
+    float viewZ = mul(float4(worldPos, 1.0f), gCsmView).z;
+    int cascade = 0;
+    if (viewZ > gCsmCascadeFar.x)
+        cascade = 1;
+    if (viewZ > gCsmCascadeFar.y)
+        cascade = 2;
+    return cascade;
+}
+
+float SampleCSM(float3 worldPos)
+{
+    // 1. view-Z to pick cascade
+    int cascade = PickCascade(worldPos);
+
+    // 2. transform to light space
+    float4 lp = mul(float4(worldPos, 1.0f), gCsmLightViewProj[cascade]);
+    lp.xyz /= lp.w;
+
+    float2 uv = lp.xy * float2(0.5f, -0.5f) + 0.5f;
+    float refDepth = lp.z - CSM_DEPTH_BIAS;
+
+    // out of cascade -> lit
+    if (uv.x < 0.0f || uv.x > 1.0f ||
+        uv.y < 0.0f || uv.y > 1.0f ||
+        refDepth < 0.0f || refDepth > 1.0f)
+        return 1.0f;
+
+    // 3. PCF 3x3
+    float shadow = 0.0f;
+    [unroll]
+    for (int x = -1; x <= 1; ++x)
+    {
+        [unroll]
+        for (int y = -1; y <= 1; ++y)
+        {
+            float2 ofs = float2((float) x, (float) y) * CSM_TEXEL_SIZE;
+            shadow += gShadowMap.SampleCmpLevelZero(
+                gShadowSampler,
+                float3(uv + ofs, (float) cascade),
+                refDepth);
+        }
+    }
+    return shadow / 9.0f;
+}
+
+// ----- BRDF -----
 float3 PhongBRDF(float3 N, float3 V, float3 L,
                   float3 albedo, float specI, float specP,
                   float3 lColor, float lIntensity)
@@ -114,8 +181,21 @@ float4 PSMain(VSOutput pin) : SV_Target
     float specP = max(normalData.a, 1.0f);
     float3 V = normalize(gEyePos.xyz - pos);
 
+    // ---- Shadow factor for directional light ----
+    float shadow = SampleCSM(pos);
+
+#if CSM_DEBUG_CASCADES
+    // Отладка: раскрасить по каскадам. Тень делает зону темнее.
+    int dbgC = PickCascade(pos);
+    float3 dbgCol = (dbgC == 0) ? float3(1, 0.3, 0.3)
+                  : (dbgC == 1) ? float3(0.3, 1, 0.3)
+                                : float3(0.3, 0.3, 1);
+    return float4(dbgCol * (0.3f + 0.7f * shadow), 1.0f);
+#endif
+
     float3 light = gAmbientColor.rgb * albedo;
-    light += CalcDirectional(N, V, albedo, specI, specP);
+    light += CalcDirectional(N, V, albedo, specI, specP) * shadow;
+
     for (int i = 0; i < gNumPointLights; ++i)
         light += CalcPoint(gPointLights[i], N, V, pos, albedo, specI, specP);
     for (int j = 0; j < gNumSpotLights; ++j)

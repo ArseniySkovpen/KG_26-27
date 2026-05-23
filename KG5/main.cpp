@@ -246,9 +246,9 @@ public:
             m_renderer.ClearLights();
             m_renderer.SetAmbient({ 0.02f, 0.02f, 0.03f });
             m_renderer.SetDirectionalLight(
-                { 1.f, -0.1f, 0.f },
-                { 0.2f, 0.4f, 1.0f },
-                4.0f);
+                { 0.4f, -1.0f, 0.3f },
+                { 1.0f, 0.95f, 0.8f },
+                3.0f);
             m_renderer.AddPointLight({ 0.f, 120.f, 0.f }, { 1.0f, 0.45f, 0.0f }, 600.f, 10.0f);
             m_renderer.AddSpotLight(
                 { 0.f, 180.f, 0.f }, { 0.f, -1.f, 0.f },

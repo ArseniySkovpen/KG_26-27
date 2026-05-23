@@ -13,6 +13,7 @@
 #include "ObjLoader.h"
 #include "TextureLoader.h"
 #include "GBuffer.h"
+#include "ShadowMapSystem.h"
 
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -22,12 +23,12 @@ using Microsoft::WRL::ComPtr;
 using namespace DirectX;
 
 // ============================================================================
-// Вершина
+// Vertex
 // ============================================================================
 struct Vertex { XMFLOAT3 Position; XMFLOAT3 Normal; XMFLOAT2 TexCoord; };
 
 // ============================================================================
-// CB для geometry pass (один слот = один сабсет одного кадра)
+// CB для geometry pass
 // ============================================================================
 struct GBufferCBData
 {
@@ -36,7 +37,7 @@ struct GBufferCBData
     XMFLOAT4X4 Proj;
     XMFLOAT4X4 WorldInvTranspose;
     XMFLOAT4   MaterialDiffuse;
-    XMFLOAT4   MaterialSpecular; // w = specular power
+    XMFLOAT4   MaterialSpecular;
     int        HasTexture;
     float      TexTilingX, TexTilingY, TotalTime;
     float      TexScrollX, TexScrollY;
@@ -44,16 +45,16 @@ struct GBufferCBData
 };
 
 // ============================================================================
-// Источники света
+// Lights
 // ============================================================================
 static constexpr int MAX_POINT_LIGHTS = 16;
 static constexpr int MAX_SPOT_LIGHTS = 4;
 
-struct PointLightData { XMFLOAT4 Position; XMFLOAT4 Color; }; // Position.w=radius, Color.w=intensity
-struct SpotLightData { XMFLOAT4 Position; XMFLOAT4 Direction; XMFLOAT4 Color; }; // Pos.w=innerCos, Dir.w=outerCos, Color.w=intensity
+struct PointLightData { XMFLOAT4 Position; XMFLOAT4 Color; };
+struct SpotLightData { XMFLOAT4 Position; XMFLOAT4 Direction; XMFLOAT4 Color; };
 
 // ============================================================================
-// CB для lighting pass (один слот на кадр)
+// CB для lighting pass (с добавленными полями CSM)
 // ============================================================================
 struct LightingCBData
 {
@@ -64,17 +65,22 @@ struct LightingCBData
     PointLightData PointLights[MAX_POINT_LIGHTS];
     SpotLightData  SpotLights[MAX_SPOT_LIGHTS];
     int NumPointLights, NumSpotLights, Pad0, Pad1;
+
+    // CSM
+    XMFLOAT4X4 CsmView;
+    XMFLOAT4X4 CsmLightViewProj[CSM_CASCADE_COUNT];
+    XMFLOAT4   CsmCascadeFar;
 };
 
 // ============================================================================
-// Материал
+// Material
 // ============================================================================
 struct GpuMaterial
 {
     ComPtr<ID3D12Resource> texture, textureUpload;
     int      srvHeapIndex = -1;
-    XMFLOAT4 diffuse = { 0.8f,0.8f,0.8f,1.f };
-    XMFLOAT4 specular = { 0.5f,0.5f,0.5f,32.f }; // w = specular power
+    XMFLOAT4 diffuse = { 0.8f, 0.8f, 0.8f, 1.f };
+    XMFLOAT4 specular = { 0.5f, 0.5f, 0.5f, 32.f };
     bool     hasTexture = false;
 };
 
@@ -114,7 +120,6 @@ public:
     void DrawScene(float totalTime, float dt);
     void EndFrame();
 
-    // Освещение
     void SetAmbient(XMFLOAT3 color);
     void SetDirectionalLight(XMFLOAT3 dir, XMFLOAT3 color, float intensity = 1.f);
     void AddPointLight(XMFLOAT3 pos, XMFLOAT3 color, float radius, float intensity = 1.f);
@@ -133,17 +138,14 @@ public:
         const std::wstring& colorPath,
         XMFLOAT3 center, float size, float displacementScale = 50.f);
     void SetTessWireframe(bool enabled) { m_tessWireframe = enabled; }
-
     void SetWireframe(bool enabled) { m_tessWireframe = enabled; }
 
-
-    // ---- Геттеры для InstanceSystem (новые методы, существующие функции не изменены) ----
-    ID3D12Device* GetDevice()     const { return m_device.Get(); }
-    ID3D12GraphicsCommandList* GetCmdList()    const { return m_cmdList.Get(); }
-    UINT                       GetFrameIndex() const { return m_frameIndex; }
-    int                        GetWidth()      const { return m_width; }
-    int                        GetHeight()     const { return m_height; }
-    XMFLOAT3                   GetEye()        const { return m_eye; }
+    ID3D12Device* GetDevice()      const { return m_device.Get(); }
+    ID3D12GraphicsCommandList* GetCmdList()     const { return m_cmdList.Get(); }
+    UINT                       GetFrameIndex()  const { return m_frameIndex; }
+    int                        GetWidth()       const { return m_width; }
+    int                        GetHeight()      const { return m_height; }
+    XMFLOAT3                   GetEye()         const { return m_eye; }
 
     ID3D12Resource* GetCurrentBackBuffer() const
     {
@@ -156,6 +158,7 @@ public:
             m_frameIndex, m_rtvDescSize);
     }
     D3D12_CPU_DESCRIPTOR_HANDLE GetGBufferDSV() const { return m_gbuffer.GetDSV(); }
+
 private:
     void CreateDevice();
     void CreateCommandObjects();
@@ -180,6 +183,7 @@ private:
     void WaitForGPU();
     void MoveToNextFrame();
     void FlushCommandQueue();
+    void DoShadowPass();          // NEW
     void DoGeometryPass(float totalTime);
     void DoLightingPass();
 
@@ -192,10 +196,6 @@ private:
     ComPtr<ID3D12Resource>            m_renderTargets[FRAME_COUNT];
     UINT                              m_frameIndex = 0;
 
-    // Heap layout:
-    //   RTV: [0..1]=swapchain, [2..4]=GBuffer RTVs
-    //   DSV: [0]=GBuffer depth
-    //   SRV: [0]=null, [1..512]=object textures, [513..515]=GBuffer SRVs
     ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
     ComPtr<ID3D12DescriptorHeap> m_dsvHeap;
     ComPtr<ID3D12DescriptorHeap> m_srvHeap;
@@ -214,7 +214,6 @@ private:
     ComPtr<ID3DBlob>            m_tessVS, m_tessHS, m_tessDS, m_tessPS;
     bool                        m_tessWireframe = false;
 
-    // Тесселированная плоскость
     ComPtr<ID3D12Resource>   m_tessVB, m_tessIB;
     D3D12_VERTEX_BUFFER_VIEW m_tessVBView{};
     D3D12_INDEX_BUFFER_VIEW  m_tessIBView{};
@@ -253,6 +252,10 @@ private:
     XMFLOAT3 m_eye = { 0.f, 150.f, -500.f };
     XMFLOAT3 m_target = { 0.f,  80.f,    0.f };
     XMFLOAT3 m_up = { 0.f,   1.f,    0.f };
+
+    // ---- CSM ----
+    ShadowMapSystem m_shadowSys;
+    int             m_csmSrvSlot = 0;
 
     int  m_width = 0, m_height = 0;
     bool m_initialized = false;

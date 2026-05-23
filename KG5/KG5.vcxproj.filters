@@ -45,6 +45,9 @@
     <ClCompile Include="Particlesystem.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="Shadowmapsystem.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -86,6 +89,9 @@
     <ClInclude Include="Particlesystem.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="Shadowmapsystem.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -97,5 +103,6 @@
     <None Include="Treeshader.hlsl" />
     <None Include="Particlerendershaders.hlsl" />
     <None Include="Particlecomputeshaders.hlsl" />
+    <None Include="Shadowmapshader.hlsl" />
   </ItemGroup>
 </Project>

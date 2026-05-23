@@ -38,6 +38,22 @@ bool RenderingSystem::Init(HWND hwnd, int width, int height)
         CreateLightingCB();
         CreateTessCB();
 
+        // ---- CSM init ----
+        if (!m_shadowSys.Init(m_device.Get()))
+            OutputDebugStringA("ShadowMapSystem init FAILED\n");
+
+        // SRV for shadow map array goes AFTER tess slots in srvHeap:
+        //   0           : null
+        //   1..512      : textures
+        //   513..515    : GBuffer SRVs
+        //   516..518    : tess (disp, norm, color)
+        //   519         : CSM array
+        m_csmSrvSlot = 1 + MAX_TEXTURES + GBuffer::RT_COUNT + 3;
+        CD3DX12_CPU_DESCRIPTOR_HANDLE csmCpu(
+            m_srvHeap->GetCPUDescriptorHandleForHeapStart(),
+            m_csmSrvSlot, m_srvDescSize);
+        m_shadowSys.CreateSrvInExternalHeap(csmCpu);
+
         m_lightData.AmbientColor = { 0.08f, 0.08f, 0.12f, 1.f };
         SetDirectionalLight({ 0.3f, -1.f, 0.5f }, { 1.f, 0.92f, 0.75f }, 1.f);
 
@@ -106,7 +122,6 @@ void RenderingSystem::CreateSwapChain(HWND hwnd, int w, int h)
 
 void RenderingSystem::CreateDescriptorHeaps()
 {
-
     {
         D3D12_DESCRIPTOR_HEAP_DESC d{};
         d.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
@@ -125,7 +140,8 @@ void RenderingSystem::CreateDescriptorHeaps()
     {
         D3D12_DESCRIPTOR_HEAP_DESC d{};
         d.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-        d.NumDescriptors = 1 + MAX_TEXTURES + GBuffer::RT_COUNT + 3;
+        // 1 null + MAX_TEXTURES + GBuffer + 3 tess + 1 CSM
+        d.NumDescriptors = 1 + MAX_TEXTURES + GBuffer::RT_COUNT + 3 + 1;
         d.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
         ThrowIfFailed(m_device->CreateDescriptorHeap(&d, IID_PPV_ARGS(&m_srvHeap)));
         m_srvDescSize = m_device->GetDescriptorHandleIncrementSize(
@@ -221,20 +237,36 @@ void RenderingSystem::CreateGeometryRootSignature()
 
 void RenderingSystem::CreateLightingRootSignature()
 {
-    CD3DX12_DESCRIPTOR_RANGE srvRange;
-    srvRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, GBuffer::RT_COUNT, 0);
+    // Slot 0: CB b0 (LightingCBData с CSM полями)
+    // Slot 1: SRV table t0..t2 (GBuffer)
+    // Slot 2: SRV table t3 (CSM array)
+    // Static samplers: s0 (point), s1 (comparison for shadow PCF)
 
-    CD3DX12_ROOT_PARAMETER params[2];
+    CD3DX12_DESCRIPTOR_RANGE gbufRange;
+    gbufRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, GBuffer::RT_COUNT, 0);  // t0..t2
+
+    CD3DX12_DESCRIPTOR_RANGE csmRange;
+    csmRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 3);                   // t3
+
+    CD3DX12_ROOT_PARAMETER params[3];
     params[0].InitAsConstantBufferView(0);
-    params[1].InitAsDescriptorTable(1, &srvRange, D3D12_SHADER_VISIBILITY_PIXEL);
+    params[1].InitAsDescriptorTable(1, &gbufRange, D3D12_SHADER_VISIBILITY_PIXEL);
+    params[2].InitAsDescriptorTable(1, &csmRange, D3D12_SHADER_VISIBILITY_PIXEL);
 
-    CD3DX12_STATIC_SAMPLER_DESC sampler(0,
+    CD3DX12_STATIC_SAMPLER_DESC samplers[2];
+    samplers[0].Init(0,
         D3D12_FILTER_MIN_MAG_MIP_POINT,
         D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
         D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
         D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+    samplers[1].Init(1,
+        D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT,
+        D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+        D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+        D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+    samplers[1].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 
-    CD3DX12_ROOT_SIGNATURE_DESC desc(2, params, 1, &sampler,
+    CD3DX12_ROOT_SIGNATURE_DESC desc(3, params, 2, samplers,
         D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
     ComPtr<ID3DBlob> serialized, errors;
@@ -495,7 +527,7 @@ void RenderingSystem::ClearLights()
 {
     m_lightData.NumPointLights = 0;
     m_lightData.NumSpotLights = 0;
-    m_lightData.DirLightColor.w = 0.f; 
+    m_lightData.DirLightColor.w = 0.f;
 }
 
 void RenderingSystem::BeginFrame(const float /*clearColor*/[4])
@@ -511,9 +543,60 @@ void RenderingSystem::DrawScene(float totalTime, float /*dt*/)
     ID3D12DescriptorHeap* heaps[] = { m_srvHeap.Get() };
     m_cmdList->SetDescriptorHeaps(1, heaps);
 
+    // 1. Shadow pass - рендерим Sponza в каскады
+    DoShadowPass();
+
+    // 2. GBuffer + tess
     DoGeometryPass(totalTime);
     DoTessPass(totalTime);
+
+    // 3. Lighting (читает CSM)
     DoLightingPass();
+}
+
+// ============================================================
+// Shadow pass
+// ============================================================
+void RenderingSystem::DoShadowPass()
+{
+    if (!m_shadowSys.IsInitialized()) return;
+
+    // 1. Compute cascades для текущей камеры и dir light direction
+    float aspect = (float)m_width / (float)m_height;
+    XMFLOAT3 lightDir = {
+        m_lightData.DirLightDir.x,
+        m_lightData.DirLightDir.y,
+        m_lightData.DirLightDir.z
+    };
+    // Shadow far меньше камеры (10000) - детали на близком, грубо вдалеке
+    m_shadowSys.ComputeCascades(m_eye, m_target, m_up, lightDir,
+        XMConvertToRadians(60.f), aspect, 1.f, 2500.f);
+
+    // 2. Transition + render каждый каскад
+    m_shadowSys.TransitionToDepthWrite(m_cmdList.Get());
+
+    m_cmdList->SetGraphicsRootSignature(m_shadowSys.GetShadowRootSignature());
+    m_cmdList->SetPipelineState(m_shadowSys.GetShadowPSO());
+    m_cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    m_cmdList->IASetVertexBuffers(0, 1, &m_vbView);
+    m_cmdList->IASetIndexBuffer(&m_ibView);
+
+    XMMATRIX worldI = XMMatrixIdentity();
+    for (UINT cascade = 0; cascade < CSM_CASCADE_COUNT; ++cascade)
+    {
+        m_shadowSys.BeginCascade(m_cmdList.Get(), cascade);
+        m_shadowSys.SetCascadeCB(m_cmdList.Get(), cascade, worldI, m_frameIndex);
+
+        for (UINT subIdx = 0; subIdx < (UINT)m_subsets.size(); ++subIdx)
+        {
+            const MeshSubset& sub = m_subsets[subIdx];
+            if (sub.indexCount == 0) continue;
+            m_cmdList->DrawIndexedInstanced(sub.indexCount, 1, sub.indexStart, 0, 0);
+        }
+    }
+
+    // 3. Transition shadow map в SRV для lighting pass
+    m_shadowSys.TransitionToShaderResource(m_cmdList.Get());
 }
 
 void RenderingSystem::DoGeometryPass(float totalTime)
@@ -603,18 +686,31 @@ void RenderingSystem::DoLightingPass()
     m_cmdList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
     m_lightData.EyePos = { m_eye.x, m_eye.y, m_eye.z, 1.f };
+
+    // ---- CSM data ----
+    XMStoreFloat4x4(&m_lightData.CsmView,
+        XMMatrixTranspose(m_shadowSys.GetCsmView()));
+    for (UINT i = 0; i < CSM_CASCADE_COUNT; ++i)
+        XMStoreFloat4x4(&m_lightData.CsmLightViewProj[i],
+            XMMatrixTranspose(m_shadowSys.GetLightViewProj(i)));
+    m_lightData.CsmCascadeFar = m_shadowSys.GetCascadeFarSplits();
+
     UINT8* lightSlot = m_lightCBMapped + m_frameIndex * m_lightCBSlotSize;
     memcpy(lightSlot, &m_lightData, sizeof(m_lightData));
     D3D12_GPU_VIRTUAL_ADDRESS lightAddr =
         m_lightCB->GetGPUVirtualAddress() + m_frameIndex * m_lightCBSlotSize;
 
     m_cmdList->SetGraphicsRootConstantBufferView(0, lightAddr);
-
     m_cmdList->SetGraphicsRootDescriptorTable(1, m_gbuffer.GetSRVTableGPU());
+
+    // ---- CSM SRV table ----
+    CD3DX12_GPU_DESCRIPTOR_HANDLE csmGpu(
+        m_srvHeap->GetGPUDescriptorHandleForHeapStart(),
+        m_csmSrvSlot, m_srvDescSize);
+    m_cmdList->SetGraphicsRootDescriptorTable(2, csmGpu);
 
     m_cmdList->DrawInstanced(3, 1, 0, 0);
 }
-
 
 void RenderingSystem::EndFrame()
 {
@@ -629,7 +725,6 @@ void RenderingSystem::EndFrame()
     ThrowIfFailed(m_swapChain->Present(1, 0));
     MoveToNextFrame();
 }
-
 
 void RenderingSystem::WaitForGPU()
 {
@@ -655,7 +750,6 @@ void RenderingSystem::MoveToNextFrame()
 }
 
 void RenderingSystem::FlushCommandQueue() { WaitForGPU(); }
-
 
 void RenderingSystem::OnResize(int width, int height)
 {

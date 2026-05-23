@@ -139,6 +139,7 @@
     <ClCompile Include="ObjLoader.cpp" />
     <ClCompile Include="Particlesystem.cpp" />
     <ClCompile Include="Renderingsystem.cpp" />
+    <ClCompile Include="Shadowmapsystem.cpp" />
     <ClCompile Include="TextureLoader.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Window.cpp" />
@@ -153,6 +154,7 @@
     <ClInclude Include="Octree.h" />
     <ClInclude Include="Particlesystem.h" />
     <ClInclude Include="Renderingsystem.h" />
+    <ClInclude Include="Shadowmapsystem.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="TextureLoader.h" />
     <ClInclude Include="Timer.h" />
@@ -218,6 +220,15 @@
       <FileType>Document</FileType>
     </None>
     <None Include="Particlerendershaders.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shadowmapshader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
