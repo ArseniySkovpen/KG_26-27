@@ -56,6 +56,19 @@ void UpdateCS(uint3 DTid : SV_DispatchThreadID)
     p.Position += p.Velocity * gDeltaTime;
     p.Life -= gDeltaTime;
 
+    // ---- Отскок от пола ----
+    const float floorY = 6.0f; // высота пола в мире
+    const float restitution = 0.5f; // упругость: 1.0 = без потерь, 0 = прилипает
+    const float friction = 0.8f; // трение по горизонтали при ударе
+
+    if (p.Position.y < floorY)
+    {
+        p.Position.y = floorY;
+        if (p.Velocity.y < 0.0f)
+            p.Velocity.y = -p.Velocity.y * restitution;
+        p.Velocity.xz *= friction;
+    }
+
     // Color fades over life - bright yellow -> red
     float fade = saturate(p.Life * 0.4f);
     p.Color = float4(1.0f, 0.85f * fade, 0.4f * fade, 1.0f);

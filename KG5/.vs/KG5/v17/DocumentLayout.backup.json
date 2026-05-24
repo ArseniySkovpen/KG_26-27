@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Particlecomputeshaders.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:Particlecomputeshaders.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
@@ -29,10 +33,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Shadowmapsystem.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:Shadowmapsystem.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Particlecomputeshaders.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|solutionrelative:Particlecomputeshaders.hlsl||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{93D82E3D-0708-47F2-99BA-21C0BDA05AA3}|KG5.vcxproj|C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Particlesystem.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -150,11 +150,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 227,
-          "SelectedChildIndex": 8,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "Shadowmapshader.hlsl",
               "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Shadowmapshader.hlsl",
               "RelativeDocumentMoniker": "Shadowmapshader.hlsl",
@@ -162,12 +162,11 @@
               "RelativeToolTip": "Shadowmapshader.hlsl",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-05-23T11:25:07.217Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-23T11:25:07.217Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "Shadowmapsystem.h",
               "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Shadowmapsystem.h",
               "RelativeDocumentMoniker": "Shadowmapsystem.h",
@@ -175,12 +174,11 @@
               "RelativeToolTip": "Shadowmapsystem.h",
               "ViewState": "AgIAAD0AAAAAAAAAAAAUwGMAAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-05-23T11:24:29.602Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-05-23T11:24:29.602Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "Shadowmapsystem.cpp",
               "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Shadowmapsystem.cpp",
               "RelativeDocumentMoniker": "Shadowmapsystem.cpp",
@@ -188,20 +186,32 @@
               "RelativeToolTip": "Shadowmapsystem.cpp",
               "ViewState": "AgIAACIBAAAAAAAAAAAUwEgBAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2026-05-23T11:24:20.645Z",
+              "WhenOpened": "2026-05-23T11:24:20.645Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Particlecomputeshaders.hlsl",
+              "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Particlecomputeshaders.hlsl",
+              "RelativeDocumentMoniker": "Particlecomputeshaders.hlsl",
+              "ToolTip": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Particlecomputeshaders.hlsl*",
+              "RelativeToolTip": "Particlecomputeshaders.hlsl*",
+              "ViewState": "AgIAAEYAAAAAAAAAAAAwwHEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2026-04-28T11:08:30.122Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "Particlecomputeshaders.hlsl",
-              "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Particlecomputeshaders.hlsl",
-              "RelativeDocumentMoniker": "Particlecomputeshaders.hlsl",
-              "ToolTip": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Particlecomputeshaders.hlsl",
-              "RelativeToolTip": "Particlecomputeshaders.hlsl",
-              "ViewState": "AgIAAE4AAAAAAAAAAAAYwGQAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-04-28T11:08:30.122Z",
+              "DocumentIndex": 1,
+              "Title": "main.cpp",
+              "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\main.cpp",
+              "RelativeDocumentMoniker": "main.cpp",
+              "ToolTip": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\main.cpp",
+              "RelativeToolTip": "main.cpp",
+              "ViewState": "AgIAAGQBAAAAAAAAAAAmwH0BAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2026-02-21T13:58:51.731Z",
               "EditorCaption": ""
             },
             {
@@ -218,7 +228,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "Lightingshader.hlsl",
               "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Lightingshader.hlsl",
               "RelativeDocumentMoniker": "Lightingshader.hlsl",
@@ -226,12 +236,11 @@
               "RelativeToolTip": "Lightingshader.hlsl",
               "ViewState": "AgIAAKcAAAAAAAAAAAAIwM0AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2026-03-13T16:01:56.584Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-13T16:01:56.584Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "Renderingsystem.cpp",
               "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Renderingsystem.cpp",
               "RelativeDocumentMoniker": "Renderingsystem.cpp",
@@ -239,12 +248,11 @@
               "RelativeToolTip": "Renderingsystem.cpp",
               "ViewState": "AgIAAOYDAAAAAAAAAAAUwAwEAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2026-03-13T15:41:40.97Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-13T15:41:40.97Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "Renderingsystem.h",
               "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\Renderingsystem.h",
               "RelativeDocumentMoniker": "Renderingsystem.h",
@@ -252,21 +260,7 @@
               "RelativeToolTip": "Renderingsystem.h",
               "ViewState": "AgIAAN8AAAAAAAAAAAAUwAUBAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-03-13T15:41:59.496Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "main.cpp",
-              "DocumentMoniker": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\main.cpp",
-              "RelativeDocumentMoniker": "main.cpp",
-              "ToolTip": "C:\\Users\\HYPERPC\\Desktop\\KG_26-27\\KG5\\main.cpp",
-              "RelativeToolTip": "main.cpp",
-              "ViewState": "AgIAAGMBAAAAAAAAAAAUwH0BAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2026-02-21T13:58:51.731Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-03-13T15:41:59.496Z"
             },
             {
               "$type": "Document",
