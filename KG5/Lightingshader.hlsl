@@ -7,9 +7,6 @@
 #define CSM_CASCADE_COUNT 3
 #define CSM_TEXEL_SIZE   (1.0f / 1024.0f)
 
-// Поставь 1 чтобы раскрасить пиксели по номеру каскада (отладка).
-// Красный = каскад 0, зелёный = 1, синий = 2.
-// Если видишь цветные зоны - каскады считаются правильно.
 #define CSM_DEBUG_CASCADES 0
 
 // Небольшой bias в сравнении глубины (борьба с shadow acne).
@@ -49,9 +46,27 @@ Texture2D gAlbedoMap : register(t0);
 Texture2D gNormalMap : register(t1);
 Texture2D gPositionMap : register(t2);
 Texture2DArray<float> gShadowMap : register(t3);
+Texture2D gMaskTex : register(t4); // texture drawn in shadowed areas
 
 SamplerState gSampler : register(s0);
 SamplerComparisonState gShadowSampler : register(s1);
+SamplerState gMaskSampler : register(s2); // linear + wrap, for tiling the mask
+
+// ----- Shadow mask settings -----
+#define MASK_FREQ      0.004f  // tiling density in world units (bigger = smaller faces)
+#define MASK_STRENGTH  1.0f    // 0 = off, 1 = fully replace shadow with the texture
+
+// Triplanar sample so the texture projects onto any surface orientation.
+// Returns rgb in .rgb and coverage (alpha) in .a.
+float4 TriplanarMask(float3 worldPos, float3 N)
+{
+    float3 w = abs(N);
+    w /= (w.x + w.y + w.z + 1e-4f);
+    float4 mx = gMaskTex.Sample(gMaskSampler, worldPos.yz * MASK_FREQ);
+    float4 my = gMaskTex.Sample(gMaskSampler, worldPos.xz * MASK_FREQ);
+    float4 mz = gMaskTex.Sample(gMaskSampler, worldPos.xy * MASK_FREQ);
+    return mx * w.x + my * w.y + mz * w.z;
+}
 
 struct VSOutput
 {
@@ -200,6 +215,13 @@ float4 PSMain(VSOutput pin) : SV_Target
         light += CalcPoint(gPointLights[i], N, V, pos, albedo, specI, specP);
     for (int j = 0; j < gNumSpotLights; ++j)
         light += CalcSpot(gSpotLights[j], N, V, pos, albedo, specI, specP);
+
+    // ---- Draw the texture in shadowed areas ----
+    // shadow: 1 = lit, 0 = fully shadowed
+    float shadowed = saturate(1.0f - shadow);
+    float4 mask = TriplanarMask(pos, N);
+    float coverage = mask.a * shadowed * MASK_STRENGTH; // alpha = where the face is opaque
+    light = lerp(light, mask.rgb, coverage);
 
     return float4(light, 1.0f);
 }

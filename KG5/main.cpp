@@ -178,6 +178,9 @@ public:
             1200.f,
             60.f);
 
+        // Texture drawn inside shadows (uses its alpha as a stencil)
+        m_renderer.LoadShadowMask(L"rock.png");
+
         if (!m_instanceSys.Init(m_renderer.GetDevice()))
             MessageBoxA(nullptr, "InstanceSystem Init failed", "Warning", MB_OK | MB_ICONWARNING);
 

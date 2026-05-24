@@ -54,6 +54,22 @@ bool RenderingSystem::Init(HWND hwnd, int width, int height)
             m_csmSrvSlot, m_srvDescSize);
         m_shadowSys.CreateSrvInExternalHeap(csmCpu);
 
+        // Shadow mask texture lives in the slot right after CSM (so the same
+        // descriptor table covers t3..t4). Initialize it with a null SRV so the
+        // shader is safe even if no mask is loaded.
+        m_maskSrvSlot = m_csmSrvSlot + 1;
+        {
+            D3D12_SHADER_RESOURCE_VIEW_DESC nullDesc{};
+            nullDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+            nullDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+            nullDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+            nullDesc.Texture2D.MipLevels = 1;
+            CD3DX12_CPU_DESCRIPTOR_HANDLE maskCpu(
+                m_srvHeap->GetCPUDescriptorHandleForHeapStart(),
+                m_maskSrvSlot, m_srvDescSize);
+            m_device->CreateShaderResourceView(nullptr, &nullDesc, maskCpu);
+        }
+
         m_lightData.AmbientColor = { 0.08f, 0.08f, 0.12f, 1.f };
         SetDirectionalLight({ 0.3f, -1.f, 0.5f }, { 1.f, 0.92f, 0.75f }, 1.f);
 
@@ -140,8 +156,8 @@ void RenderingSystem::CreateDescriptorHeaps()
     {
         D3D12_DESCRIPTOR_HEAP_DESC d{};
         d.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-        // 1 null + MAX_TEXTURES + GBuffer + 3 tess + 1 CSM
-        d.NumDescriptors = 1 + MAX_TEXTURES + GBuffer::RT_COUNT + 3 + 1;
+        // 1 null + MAX_TEXTURES + GBuffer + 3 tess + 1 CSM + 1 shadow mask
+        d.NumDescriptors = 1 + MAX_TEXTURES + GBuffer::RT_COUNT + 3 + 1 + 1;
         d.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
         ThrowIfFailed(m_device->CreateDescriptorHeap(&d, IID_PPV_ARGS(&m_srvHeap)));
         m_srvDescSize = m_device->GetDescriptorHandleIncrementSize(
@@ -237,7 +253,7 @@ void RenderingSystem::CreateGeometryRootSignature()
 
 void RenderingSystem::CreateLightingRootSignature()
 {
-    // Slot 0: CB b0 (LightingCBData с CSM полями)
+    // Slot 0: CB b0 (LightingCBData пїЅ CSM пїЅпїЅпїЅпїЅпїЅпїЅ)
     // Slot 1: SRV table t0..t2 (GBuffer)
     // Slot 2: SRV table t3 (CSM array)
     // Static samplers: s0 (point), s1 (comparison for shadow PCF)
@@ -246,14 +262,14 @@ void RenderingSystem::CreateLightingRootSignature()
     gbufRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, GBuffer::RT_COUNT, 0);  // t0..t2
 
     CD3DX12_DESCRIPTOR_RANGE csmRange;
-    csmRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 3);                   // t3
+    csmRange.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 3);                   // t3 (CSM) + t4 (mask)
 
     CD3DX12_ROOT_PARAMETER params[3];
     params[0].InitAsConstantBufferView(0);
     params[1].InitAsDescriptorTable(1, &gbufRange, D3D12_SHADER_VISIBILITY_PIXEL);
     params[2].InitAsDescriptorTable(1, &csmRange, D3D12_SHADER_VISIBILITY_PIXEL);
 
-    CD3DX12_STATIC_SAMPLER_DESC samplers[2];
+    CD3DX12_STATIC_SAMPLER_DESC samplers[3];
     samplers[0].Init(0,
         D3D12_FILTER_MIN_MAG_MIP_POINT,
         D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
@@ -265,8 +281,13 @@ void RenderingSystem::CreateLightingRootSignature()
         D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
         D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
     samplers[1].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+    samplers[2].Init(2,
+        D3D12_FILTER_MIN_MAG_MIP_LINEAR,
+        D3D12_TEXTURE_ADDRESS_MODE_WRAP,
+        D3D12_TEXTURE_ADDRESS_MODE_WRAP,
+        D3D12_TEXTURE_ADDRESS_MODE_WRAP);
 
-    CD3DX12_ROOT_SIGNATURE_DESC desc(3, params, 2, samplers,
+    CD3DX12_ROOT_SIGNATURE_DESC desc(3, params, 3, samplers,
         D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
     ComPtr<ID3DBlob> serialized, errors;
@@ -543,14 +564,14 @@ void RenderingSystem::DrawScene(float totalTime, float /*dt*/)
     ID3D12DescriptorHeap* heaps[] = { m_srvHeap.Get() };
     m_cmdList->SetDescriptorHeaps(1, heaps);
 
-    // 1. Shadow pass - рендерим Sponza в каскады
+    // 1. Shadow pass - пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Sponza пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     DoShadowPass();
 
     // 2. GBuffer + tess
     DoGeometryPass(totalTime);
     DoTessPass(totalTime);
 
-    // 3. Lighting (читает CSM)
+    // 3. Lighting (пїЅпїЅпїЅпїЅпїЅпїЅ CSM)
     DoLightingPass();
 }
 
@@ -561,18 +582,18 @@ void RenderingSystem::DoShadowPass()
 {
     if (!m_shadowSys.IsInitialized()) return;
 
-    // 1. Compute cascades для текущей камеры и dir light direction
+    // 1. Compute cascades пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ dir light direction
     float aspect = (float)m_width / (float)m_height;
     XMFLOAT3 lightDir = {
         m_lightData.DirLightDir.x,
         m_lightData.DirLightDir.y,
         m_lightData.DirLightDir.z
     };
-    // Shadow far меньше камеры (10000) - детали на близком, грубо вдалеке
+    // Shadow far пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (10000) - пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
     m_shadowSys.ComputeCascades(m_eye, m_target, m_up, lightDir,
         XMConvertToRadians(60.f), aspect, 1.f, 2500.f);
 
-    // 2. Transition + render каждый каскад
+    // 2. Transition + render пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
     m_shadowSys.TransitionToDepthWrite(m_cmdList.Get());
 
     m_cmdList->SetGraphicsRootSignature(m_shadowSys.GetShadowRootSignature());
@@ -595,7 +616,7 @@ void RenderingSystem::DoShadowPass()
         }
     }
 
-    // 3. Transition shadow map в SRV для lighting pass
+    // 3. Transition shadow map пїЅ SRV пїЅпїЅпїЅ lighting pass
     m_shadowSys.TransitionToShaderResource(m_cmdList.Get());
 }
 
@@ -987,6 +1008,41 @@ bool RenderingSystem::LoadTessPlane(const std::wstring& dispPath,
     m_tessColorUpload.Reset();
     m_tessReady = (m_tessDispSRV >= 0 && m_tessPSO);
     return m_tessReady;
+}
+
+bool RenderingSystem::LoadShadowMask(const std::wstring& path)
+{
+    ThrowIfFailed(m_cmdList->Reset(m_cmdAllocators[m_frameIndex].Get(), nullptr));
+
+    TextureLoader::TextureData td;
+    bool ok = TextureLoader::LoadFromFile(path, td) &&
+        TextureLoader::CreateTexture(m_device.Get(), m_cmdList.Get(),
+            td, m_maskTex, m_maskUpload);
+
+    if (ok)
+    {
+        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        srvDesc.Format = td.format;
+        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+        srvDesc.Texture2D.MipLevels = 1;
+        CD3DX12_CPU_DESCRIPTOR_HANDLE h(
+            m_srvHeap->GetCPUDescriptorHandleForHeapStart(),
+            m_maskSrvSlot, m_srvDescSize);
+        m_device->CreateShaderResourceView(m_maskTex.Get(), &srvDesc, h);
+    }
+    else
+    {
+        OutputDebugStringW((L"LoadShadowMask FAILED: " + path + L"\n").c_str());
+    }
+
+    ThrowIfFailed(m_cmdList->Close());
+    ID3D12CommandList* cmds[] = { m_cmdList.Get() };
+    m_cmdQueue->ExecuteCommandLists(1, cmds);
+    WaitForGPU();
+
+    m_maskUpload.Reset();
+    return ok;
 }
 
 

@@ -28,7 +28,7 @@ using namespace DirectX;
 struct Vertex { XMFLOAT3 Position; XMFLOAT3 Normal; XMFLOAT2 TexCoord; };
 
 // ============================================================================
-// CB для geometry pass
+// CB пїЅпїЅпїЅ geometry pass
 // ============================================================================
 struct GBufferCBData
 {
@@ -54,7 +54,7 @@ struct PointLightData { XMFLOAT4 Position; XMFLOAT4 Color; };
 struct SpotLightData { XMFLOAT4 Position; XMFLOAT4 Direction; XMFLOAT4 Color; };
 
 // ============================================================================
-// CB для lighting pass (с добавленными полями CSM)
+// CB пїЅпїЅпїЅ lighting pass (пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ CSM)
 // ============================================================================
 struct LightingCBData
 {
@@ -137,6 +137,9 @@ public:
     bool LoadTessPlane(const std::wstring& dispPath, const std::wstring& normalPath,
         const std::wstring& colorPath,
         XMFLOAT3 center, float size, float displacementScale = 50.f);
+
+    // Loads a texture that will be drawn in shadowed areas (uses its alpha as a stencil).
+    bool LoadShadowMask(const std::wstring& path);
     void SetTessWireframe(bool enabled) { m_tessWireframe = enabled; }
     void SetWireframe(bool enabled) { m_tessWireframe = enabled; }
 
@@ -256,6 +259,10 @@ private:
     // ---- CSM ----
     ShadowMapSystem m_shadowSys;
     int             m_csmSrvSlot = 0;
+
+    // ---- Shadow mask texture ----
+    ComPtr<ID3D12Resource> m_maskTex, m_maskUpload;
+    int                    m_maskSrvSlot = -1;
 
     int  m_width = 0, m_height = 0;
     bool m_initialized = false;
